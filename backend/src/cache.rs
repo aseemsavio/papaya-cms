@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
+use tracing::{info, warn};
 
 use crate::config::Config;
 use crate::error::{AppError, AppResult};
@@ -26,7 +27,10 @@ impl PostMetadata {
         let title = frontmatter
             .get("title")
             .and_then(|v| v.as_str())
-            .ok_or(AppError::InvalidFrontmatter)?
+            .ok_or_else(|| {
+                warn!("Missing or invalid 'title' field for slug: {}", slug);
+                AppError::InvalidFrontmatter
+            })?
             .to_string();
 
         let summary = frontmatter
@@ -42,12 +46,21 @@ impl PostMetadata {
         let date_str = frontmatter
             .get("date")
             .and_then(|v| v.as_str())
-            .ok_or(AppError::InvalidFrontmatter)?;
+            .ok_or_else(|| {
+                warn!("Missing or invalid 'date' field for slug: {}", slug);
+                AppError::InvalidFrontmatter
+            })?;
 
         let date = DateTime::parse_from_rfc3339(date_str)
-            .or_else(|_| DateTime::parse_from_str(date_str, "%Y-%m-%d"))
             .map(|dt| dt.with_timezone(&Utc))
-            .map_err(|_| AppError::InvalidFrontmatter)?;
+            .or_else(|_| {
+                NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
+                    .map(|nd| nd.and_hms_opt(0, 0, 0).unwrap().and_utc())
+            })
+            .map_err(|e| {
+                warn!("Date parse failed for slug '{}': {} (value: '{}')", slug, e, date_str);
+                AppError::InvalidFrontmatter
+            })?;
 
         let date_rfc3339 = date.to_rfc3339();
         let date_display = date.format("%B %d, %Y").to_string();
@@ -96,10 +109,13 @@ impl Cache {
     }
 
     pub async fn refresh(&self, s3_client: &S3ClientRef, _config: &Config) -> AppResult<()> {
+        info!("Refreshing cache from S3...");
         let keys = s3_client.list_objects("markdown/").await?;
+        info!("Found {} objects in S3 under markdown/ prefix", keys.len());
 
         let mut posts = Vec::new();
         let mut slug_index = HashMap::new();
+        let mut loaded_count = 0;
 
         for key in keys {
             if !key.ends_with(".md") {
@@ -112,14 +128,33 @@ impl Cache {
                 continue;
             }
 
-            let content = s3_client.get_object(&key).await?;
+            let content = match s3_client.get_object(&key).await {
+                Ok(c) => c,
+                Err(e) => {
+                    warn!("Failed to fetch object {}: {}", key, e);
+                    continue;
+                }
+            };
 
-            let (frontmatter, _) = parse_frontmatter(&content)?;
+            let (frontmatter, _) = match parse_frontmatter(&content) {
+                Ok(fm) => fm,
+                Err(e) => {
+                    warn!("Failed to parse frontmatter for {}: {}", slug, e);
+                    continue;
+                }
+            };
 
-            if let Ok(post) = PostMetadata::from_frontmatter(slug.to_string(), &frontmatter) {
-                let index = posts.len();
-                slug_index.insert(post.slug.clone(), index);
-                posts.push(post);
+            match PostMetadata::from_frontmatter(slug.to_string(), &frontmatter) {
+                Ok(post) => {
+                    let index = posts.len();
+                    slug_index.insert(post.slug.clone(), index);
+                    posts.push(post.clone());
+                    loaded_count += 1;
+                    info!("Loaded blog post: {} (title: {}, date: {})", post.slug, post.title, post.date_display);
+                }
+                Err(e) => {
+                    warn!("Failed to build post metadata for {}: {}", slug, e);
+                }
             }
         }
 
@@ -135,6 +170,7 @@ impl Cache {
             *index_lock = slug_index;
         }
 
+        info!("Cache refresh completed. Loaded {} blog posts.", loaded_count);
         Ok(())
     }
 
