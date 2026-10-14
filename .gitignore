@@ -20,8 +20,8 @@ config.toml
 # Logs
 *.log
 
-# Templates (cloned at runtime)
-/templates
+# Templates (cloned at runtime - override with local templates)
+# /templates
 
 # Docker
 docker-compose.override.yml
