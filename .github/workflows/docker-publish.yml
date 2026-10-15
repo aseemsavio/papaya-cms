@@ -1,0 +1,187 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        type: choice
+        required: true
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: 'Dry run (build but do not push)'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+      image_tag: ${{ steps.set-version.outputs.image_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for tag calculation
+
+      - name: Calculate next version
+        id: set-version
+        run: |
+          # Get the latest version tag (format: v0.0.1)
+          LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          
+          if [ -z "$LATEST_TAG" ]; then
+            # No tags exist, start at 0.0.1
+            MAJOR=0
+            MINOR=0
+            PATCH=1
+          else
+            # Parse the latest tag (strip 'v' prefix)
+            VERSION=${LATEST_TAG#v}
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f2)
+            PATCH=$(echo $VERSION | cut -d. -f3)
+            
+            # Increment based on input
+            BUMP_TYPE="${{ github.event.inputs.version_bump }}"
+            case $BUMP_TYPE in
+              major)
+                MAJOR=$((MAJOR + 1))
+                MINOR=0
+                PATCH=0
+                ;;
+              minor)
+                MINOR=$((MINOR + 1))
+                PATCH=0
+                ;;
+              patch|*)
+                PATCH=$((PATCH + 1))
+                ;;
+            esac
+          fi
+          
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          NEW_TAG="v${NEW_VERSION}"
+          
+          echo "Latest tag: ${LATEST_TAG:-none}"
+          echo "New version: ${NEW_VERSION}"
+          echo "New tag: ${NEW_TAG}"
+          
+          # Set outputs
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${NEW_TAG}" >> $GITHUB_OUTPUT
+          echo "image_tag=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "image_tag_latest=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
+
+      - name: Display version info
+        run: |
+          echo "=== Version Information ==="
+          echo "Version: ${{ steps.set-version.outputs.version }}"
+          echo "Tag: ${{ steps.set-version.outputs.tag }}"
+          echo "Image: ${{ steps.set-version.outputs.image_tag }}"
+          echo "============================"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: ${{ !github.event.inputs.dry_run }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.set-version.outputs.version }}
+            type=raw,value=latest
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix=
+          labels: |
+            org.opencontainers.image.title=Papaya CMS
+            org.opencontainers.image.description=A static site CMS built with Rust
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.set-version.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ !github.event.inputs.dry_run }}
+          tags: |
+            ${{ steps.set-version.outputs.image_tag }}
+            ${{ steps.set-version.outputs.image_tag_latest }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Create Git tag
+        if: ${{ !github.event.inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.set-version.outputs.tag }}
+          git push origin ${{ steps.set-version.outputs.tag }}
+
+      - name: Create GitHub Release
+        if: ${{ !github.event.inputs.dry_run }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.set-version.outputs.tag }}
+          name: Release ${{ steps.set-version.outputs.tag }}
+          body: |
+            ## Papaya CMS ${{ steps.set-version.outputs.tag }}
+            
+            ### Docker Image
+            ```bash
+            docker pull ${{ steps.set-version.outputs.image_tag }}
+            ```
+            
+            ### Changes
+            - Automated release via GitHub Actions
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.inputs.dry_run }}
+    steps:
+      - name: Notify completion
+        run: |
+          echo "✅ Docker image published successfully!"
+          echo "Version: ${{ needs.build-and-push.outputs.version }}"
+          echo "Image: ${{ needs.build-and-push.outputs.image_tag }}"
+          echo ""
+          echo "To pull the image:"
+          echo "  docker pull ${{ needs.build-and-push.outputs.image_tag }}"
+          echo ""
+          echo "To run:"
+          echo "  docker run -p 8080:8080 ${{ needs.build-and-push.outputs.image_tag }}"
