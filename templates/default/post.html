@@ -158,9 +158,25 @@
         .token.regex, .token.important, .token.variable { @apply text-orange-400; }
 
         /* Swiper carousel custom styles */
-        .prose .gallery-swiper { @apply w-full; }
-        .prose .gallery-swiper .swiper-slide { @apply flex-shrink-0; }
-        .prose .gallery-swiper img { @apply w-full h-auto rounded-xl shadow-lg; }
+        .prose .gallery-swiper { 
+            @apply w-full; 
+            width: 100% !important;
+        }
+        .prose .gallery-swiper .swiper-wrapper {
+            width: 100% !important;
+        }
+        .prose .gallery-swiper .swiper-slide { 
+            @apply flex-shrink-0; 
+            width: 100% !important;
+            display: flex;
+            justify-content: center;
+        }
+        .prose .gallery-swiper img { 
+            @apply w-full h-auto rounded-xl shadow-lg; 
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
         .prose .gallery-swiper .swiper-pagination-bullet { @apply bg-primary-500; }
         .prose .gallery-swiper .swiper-button-next,
         .prose .gallery-swiper .swiper-button-prev { @apply text-primary-600; }
@@ -347,6 +363,8 @@
                 
                 // Initialize Swiper
                 new Swiper(swiperWrapper, {
+                    slidesPerView: 1,
+                    spaceBetween: 0,
                     loop: true,
                     pagination: {
                         el: '.swiper-pagination',
@@ -360,6 +378,7 @@
                         delay: 5000,
                         disableOnInteraction: false,
                     },
+                    centeredSlides: true,
                 });
             }
         });
