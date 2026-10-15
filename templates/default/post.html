@@ -37,184 +37,116 @@
             },
         }
     </script>
+    <!-- Prism.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+    <!-- Swiper CSS for carousel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <style>
         .prose {
             @apply text-gray-800 leading-relaxed;
         }
-        .prose h1 { @apply text-3xl md:text-4xl font-serif font-bold text-gray-900 mt-10 mb-4; }
-        .prose h2 { @apply text-2xl md:text-3xl font-serif font-bold text-gray-900 mt-8 mb-3; }
-        .prose h3 { @apply text-xl md:text-2xl font-serif font-semibold text-gray-900 mt-6 mb-2; }
-        .prose p { @apply mb-4; }
-        .prose a { @apply text-primary-600 underline underline-offset-2 hover:text-primary-700; }
+        /* Headings - ensure they're styled even without explicit classes */
+        .prose h1,
+        #post-content h1 {
+            @apply text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-gray-900 mt-12 mb-6 leading-tight !important;
+            font-family: 'Playfair Display', Georgia, serif !important;
+        }
+        .prose h2,
+        #post-content h2 {
+            @apply text-3xl md:text-4xl font-serif font-bold text-gray-900 mt-10 mb-4 pb-2 border-b border-gray-200 !important;
+            font-family: 'Playfair Display', Georgia, serif !important;
+        }
+        .prose h3,
+        #post-content h3 {
+            @apply text-2xl md:text-3xl font-serif font-semibold text-gray-900 mt-8 mb-3 !important;
+            font-family: 'Playfair Display', Georgia, serif !important;
+        }
+        .prose h4,
+        #post-content h4 {
+            @apply text-xl md:text-2xl font-serif font-semibold text-gray-900 mt-6 mb-2 !important;
+            font-family: 'Playfair Display', Georgia, serif !important;
+        }
+        .prose h5, .prose h6,
+        #post-content h5, #post-content h6 {
+            @apply text-lg md:text-xl font-serif font-medium text-gray-900 mt-4 mb-2 !important;
+            font-family: 'Playfair Display', Georgia, serif !important;
+        }
+        .prose p { @apply mb-6 text-lg leading-relaxed; }
+        .prose a { @apply text-primary-600 underline underline-offset-2 hover:text-primary-700 transition-colors; }
         .prose strong { @apply font-semibold text-gray-900; }
         .prose em { @apply italic; }
-        .prose code { @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-primary-700; }
-        .prose pre { @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4; }
-        .prose pre code { @apply bg-transparent p-0 text-sm; }
-        .prose blockquote { @apply border-l-4 border-primary-500 pl-4 italic text-gray-600 my-4; }
-        .prose ul { @apply list-disc list-inside mb-4 space-y-1; }
-        .prose ol { @apply list-decimal list-inside mb-4 space-y-1; }
-        .prose li { @apply ml-4; }
-        .prose img { @apply rounded-lg my-6 max-w-full h-auto; }
-        .prose table { @apply w-full border-collapse mb-4; }
-        .prose th, .prose td { @apply border border-gray-300 px-4 py-2 text-left; }
-        .prose th { @apply bg-gray-100 font-semibold; }
-        .prose hr { @apply border-gray-300 my-8; }
-        .prose figure { @apply my-6; }
-        .prose figcaption { @apply text-center text-sm text-gray-500 mt-2; }
-        .prose kbd { @apply bg-gray-100 px-2 py-1 rounded font-mono text-sm border border-gray-200; }
-        .prose .gallery { @apply grid grid-cols-1 sm:grid-cols-2 gap-4 my-6; }
-        .prose .gallery img { @apply w-full h-auto rounded-lg; }
-
-        /* Enhanced table styling */
-        .prose table {
-            @apply w-full border-collapse mb-6 shadow-sm rounded-lg overflow-hidden;
-        }
-        .prose thead th {
-            @apply bg-primary-50 border-b-2 border-primary-200 px-4 py-3 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider;
-        }
-        .prose tbody td {
-            @apply border-b border-gray-100 px-4 py-3 text-gray-700;
-        }
-        .prose tbody tr:last-child td {
-            @apply border-b-0;
-        }
-        .prose tbody tr:hover td {
-            @apply bg-primary-50/50;
-        }
-        .prose tbody tr:nth-child(even) td {
-            @apply bg-gray-50/50;
-        }
-
-        /* Enhanced code blocks with syntax highlighting support */
-        .prose pre {
-            @apply bg-gray-950 text-gray-100 p-5 rounded-xl overflow-x-auto mb-6 shadow-lg;
-            border: 1px solid #374151;
-        }
-        .prose pre code {
-            @apply bg-transparent p-0 text-sm leading-relaxed;
-            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
-        }
-        .prose :not(pre) > code {
-            @apply bg-primary-50 text-primary-700 px-2 py-0.5 rounded font-mono text-sm border border-primary-100;
-        }
-        /* Language badge on code blocks */
-        .prose pre {
-            position: relative;
-        }
-        .prose pre::before {
-            content: attr(data-language);
-            @apply absolute top-2 right-3 text-xs text-gray-400 font-medium uppercase tracking-wider;
-        }
-        .prose pre code {
-            @apply block;
-        }
-
-        /* Enhanced blockquotes */
-        .prose blockquote {
-            @apply relative pl-6 border-l-4 border-primary-400 italic text-gray-600 my-6;
-            background: linear-gradient(90deg, #fef7ee 0%, transparent 100%);
-            padding: 1rem 1.5rem;
-            border-radius: 0 0.75rem 0.75rem 0;
-        }
+        .prose code { @apply bg-primary-50 text-primary-700 px-2 py-0.5 rounded font-mono text-sm border border-primary-100; }
+        .prose pre { @apply bg-gray-950 text-gray-100 p-6 rounded-xl overflow-x-auto mb-8 shadow-lg; border: 1px solid #374151; }
+        .prose pre code { @apply bg-transparent p-0 text-base leading-relaxed; font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace; }
+        .prose blockquote { @apply relative pl-6 border-l-4 border-primary-400 italic text-gray-600 my-8; background: linear-gradient(90deg, #fef7ee 0%, transparent 100%); padding: 1.5rem 2rem; border-radius: 0 1rem 1rem 0; }
         .prose blockquote p:first-child { @apply mt-0; }
         .prose blockquote p:last-child { @apply mb-0; }
-        .prose blockquote::before {
-            content: '"';
-            @apply absolute -left-2 top-0 text-5xl font-serif text-primary-300 leading-none;
+        .prose blockquote::before { content: '"'; @apply absolute -left-2 top-0 text-6xl font-serif text-primary-300 leading-none; }
+        .prose ul { @apply list-disc list-inside mb-6 space-y-3 pl-2; }
+        .prose ol { @apply list-decimal list-inside mb-6 space-y-3 pl-2; }
+        .prose li { @apply ml-2 leading-relaxed text-lg; }
+        .prose li::marker { @apply text-primary-500 font-bold; }
+        .prose img { @apply rounded-xl my-10 max-w-full h-auto shadow-lg; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .prose img:hover { @apply shadow-xl; transform: scale(1.01); }
+        .prose figure { @apply my-10; }
+        .prose figcaption { @apply text-center text-sm text-gray-500 mt-3 italic; }
+        .prose hr { @apply my-12; background: linear-gradient(90deg, transparent, #fad8ac, transparent); height: 2px; border: none; }
+        .prose kbd { @apply bg-gray-100 px-2 py-1 rounded font-mono text-sm border border-gray-200; }
+        
+        /* Tables - pretty with borders */
+        .prose table,
+        #post-content table {
+            @apply w-full border-collapse mb-8 shadow-sm rounded-xl overflow-hidden !important;
+            border: 2px solid #e5e7eb !important;
         }
-
-        /* Enhanced images with zoom effect */
-        .prose img {
-            @apply rounded-xl my-8 max-w-full h-auto shadow-lg;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .prose thead th,
+        #post-content thead th {
+            @apply bg-gradient-to-r from-primary-50 to-primary-100 border-b-2 border-primary-300 px-5 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider !important;
+            border-right: 1px solid #d1d5db !important;
         }
-        .prose img:hover {
-            @apply shadow-xl;
-            transform: scale(1.01);
+        .prose thead th:last-child,
+        #post-content thead th:last-child {
+            border-right: none !important;
         }
-        .prose figure {
-            @apply my-8;
+        .prose tbody td,
+        #post-content tbody td {
+            @apply border-b border-gray-200 px-5 py-4 text-gray-700 !important;
+            border-right: 1px solid #e5e7eb !important;
         }
-        .prose figcaption {
-            @apply text-center text-sm text-gray-500 mt-3 italic;
+        .prose tbody td:last-child,
+        #post-content tbody td:last-child {
+            border-right: none !important;
         }
-
-        /* Enhanced lists */
-        .prose ul {
-            @apply list-disc list-inside mb-4 space-y-2 pl-2;
+        .prose tbody tr:last-child td,
+        #post-content tbody tr:last-child td {
+            @apply border-b-0 !important;
         }
-        .prose ol {
-            @apply list-decimal list-inside mb-4 space-y-2 pl-2;
+        .prose tbody tr:hover td,
+        #post-content tbody tr:hover td {
+            @apply bg-primary-50/50 !important;
         }
-        .prose li {
-            @apply ml-2 leading-relaxed;
+        .prose tbody tr:nth-child(even) td,
+        #post-content tbody tr:nth-child(even) td {
+            @apply bg-gray-50/50 !important;
         }
-        .prose li::marker {
-            @apply text-primary-500 font-bold;
-        }
+        
+        .prose .gallery { @apply my-10; }
+        .prose .gallery img { @apply w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow; }
+        .prose .footnotes { @apply mt-12 pt-6 border-t border-gray-200 text-sm text-gray-600; }
+        .prose .footnotes hr { @apply hidden; }
+        .prose .footnote-backref { @apply ml-1 text-primary-500 no-underline; }
+        .prose .footnote-ref { @apply text-primary-500 no-underline hover:underline; }
+        .prose .footnote-definition { @apply mb-3 pl-4 border-l-2 border-primary-200; }
+        .prose .footnote-definition-label { @apply text-primary-500 font-bold; }
 
         /* Task lists */
-        .prose ul.contains-task-list {
-            @apply list-none pl-0;
-        }
-        .prose .task-list-item {
-            @apply flex items-start gap-3 pl-2 py-1;
-        }
-        .prose .task-list-item input[type="checkbox"] {
-            @apply mt-1 w-5 h-5 accent-primary-500 cursor-pointer;
-        }
-        .prose .task-list-item label {
-            @apply cursor-pointer;
-        }
+        .prose ul.contains-task-list { @apply list-none pl-0 space-y-2; }
+        .prose .task-list-item { @apply flex items-center gap-3 pl-2 py-2 bg-gray-50 rounded-lg; }
+        .prose .task-list-item input[type="checkbox"] { @apply w-5 h-5 accent-primary-500 cursor-pointer; }
+        .prose .task-list-item label { @apply cursor-pointer text-lg; }
 
-        /* Footnotes */
-        .prose .footnotes {
-            @apply mt-10 pt-6 border-t border-gray-200 text-sm text-gray-600;
-        }
-        .prose .footnotes hr {
-            @apply hidden;
-        }
-        .prose .footnote-backref {
-            @apply ml-1 text-primary-500 no-underline;
-        }
-        .prose .footnote-ref {
-            @apply text-primary-500 no-underline hover:underline;
-        }
-
-        /* Gallery grid */
-        .prose .gallery {
-            @apply grid grid-cols-1 sm:grid-cols-2 gap-4 my-8;
-        }
-        .prose .gallery img {
-            @apply w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow;
-        }
-
-        /* Headings anchor links */
-        .prose h1, .prose h2, .prose h3 {
-            @apply relative;
-        }
-        .prose h1 a, .prose h2 a, .prose h3 a {
-            @apply absolute -left-8 opacity-0 transition-opacity text-primary-500 hover:text-primary-600;
-        }
-        .prose h1:hover a, .prose h2:hover a, .prose h3:hover a {
-            @apply opacity-100;
-        }
-
-        /* Horizontal rule */
-        .prose hr {
-            @apply border-gray-200 my-10;
-            background: linear-gradient(90deg, transparent, #fad8ac, transparent);
-            height: 2px;
-            border: none;
-        }
-
-        /* Responsive table wrapper */
-        .table-wrapper {
-            @apply overflow-x-auto my-6 rounded-lg border border-gray-200;
-        }
-
-        /* Syntax highlighting colors */
+        /* Syntax highlighting colors for Prism Tomorrow Night theme */
         .token.comment, .token.prolog, .token.doctype, .token.cdata { @apply text-gray-500; }
         .token.punctuation { @apply text-gray-300; }
         .token.property, .token.tag, .token.constant, .token.symbol, .token.deleted { @apply text-red-400; }
@@ -224,6 +156,55 @@
         .token.atrule, .token.attr-value, .token.keyword { @apply text-purple-400; }
         .token.function, .token.class-name { @apply text-blue-400; }
         .token.regex, .token.important, .token.variable { @apply text-orange-400; }
+
+        /* Swiper carousel custom styles */
+        .prose .gallery-swiper { 
+            @apply w-full; 
+            width: 100% !important;
+        }
+        .prose .gallery-swiper .swiper-wrapper {
+            width: 100% !important;
+        }
+        .prose .gallery-swiper .swiper-slide { 
+            @apply flex-shrink-0; 
+            width: 100% !important;
+            display: flex;
+            justify-content: center;
+        }
+        .prose .gallery-swiper img { 
+            @apply w-full h-auto rounded-xl shadow-lg; 
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+        .prose .gallery-swiper .swiper-pagination-bullet { @apply bg-primary-500; }
+        .prose .gallery-swiper .swiper-button-next,
+        .prose .gallery-swiper .swiper-button-prev { @apply text-primary-600; }
+        .prose .gallery-swiper .swiper-button-next:after,
+        .prose .gallery-swiper .swiper-button-prev:after { @apply text-2xl font-bold; }
+
+        /* Explicit heading styles (override any conflicts) */
+        #post-content h1 { font-size: 2.25rem; line-height: 1.1; font-weight: 700; color: #111827; margin-top: 3rem; margin-bottom: 1.5rem; font-family: 'Playfair Display', Georgia, serif !important; }
+        @media (min-width: 768px) { #post-content h1 { font-size: 3rem; } }
+        @media (min-width: 1024px) { #post-content h1 { font-size: 3.75rem; } }
+        #post-content h2 { font-size: 1.875rem; line-height: 1.2; font-weight: 700; color: #111827; margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb; font-family: 'Playfair Display', Georgia, serif !important; }
+        @media (min-width: 768px) { #post-content h2 { font-size: 2.25rem; } }
+        #post-content h3 { font-size: 1.5rem; line-height: 1.3; font-weight: 600; color: #111827; margin-top: 2rem; margin-bottom: 0.75rem; font-family: 'Playfair Display', Georgia, serif !important; }
+        @media (min-width: 768px) { #post-content h3 { font-size: 1.875rem; } }
+        #post-content h4 { font-size: 1.25rem; line-height: 1.4; font-weight: 600; color: #111827; margin-top: 1.5rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', Georgia, serif !important; }
+        @media (min-width: 768px) { #post-content h4 { font-size: 1.5rem; } }
+        #post-content h5, #post-content h6 { font-size: 1.125rem; line-height: 1.4; font-weight: 500; color: #111827; margin-top: 1rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', Georgia, serif !important; }
+        @media (min-width: 768px) { #post-content h5, #post-content h6 { font-size: 1.25rem; } }
+
+        /* Explicit table styles */
+        #post-content table { width: 100% !important; border-collapse: collapse !important; margin-bottom: 2rem !important; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important; border-radius: 0.75rem !important; overflow: hidden !important; border: 2px solid #e5e7eb !important; }
+        #post-content thead th { background: linear-gradient(to right, #fef7ee, #fdedd6) !important; border-bottom: 2px solid #f6bc7a !important; padding: 1rem 1.25rem !important; text-align: left !important; font-size: 0.875rem !important; font-weight: 600 !important; color: #111827 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; border-right: 1px solid #d1d5db !important; }
+        #post-content thead th:last-child { border-right: none !important; }
+        #post-content tbody td { border-bottom: 1px solid #e5e7eb !important; padding: 1rem 1.25rem !important; color: #374151 !important; border-right: 1px solid #e5e7eb !important; }
+        #post-content tbody td:last-child { border-right: none !important; }
+        #post-content tbody tr:last-child td { border-bottom: none !important; }
+        #post-content tbody tr:hover td { background-color: rgba(237, 125, 28, 0.05) !important; }
+        #post-content tbody tr:nth-child(even) td { background-color: rgba(249, 250, 251, 0.5) !important; }
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-50 text-gray-900">
@@ -243,7 +224,7 @@
 
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <article>
-            <header class="mb-8">
+            <header class="mb-10">
                 <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
                     <time datetime="{{ post.date_rfc3339 }}">{{ post.date_display }}</time>
                     {% if post.author %}
@@ -262,17 +243,17 @@
             </header>
 
             {% if post.cover_image %}
-            <figure class="mb-10">
-                <img src="{{ post.cover_image }}" alt="{{ post.title }}" class="w-full h-auto max-h-[600px] object-cover rounded-xl shadow-xl">
-                {% if post.cover_image|truncate(1, true, '') == '' %}{% else %}<figcaption>{{ post.title }}</figcaption>{% endif %}
+            <figure class="mb-12">
+                <img src="{{ post.cover_image }}" alt="{{ post.title }}" class="w-full h-auto max-h-[600px] object-cover rounded-2xl shadow-xl">
+                <figcaption>{{ post.title }}</figcaption>
             </figure>
             {% endif %}
 
-            <div class="prose prose-lg max-w-none">
+            <div class="prose prose-lg max-w-none" id="post-content">
                 {{ content | safe }}
             </div>
 
-            <footer class="mt-12 pt-8 border-t border-gray-200">
+            <footer class="mt-14 pt-8 border-t border-gray-200">
                 <a href="/" class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -290,5 +271,133 @@
             </p>
         </div>
     </footer>
+
+    <!-- Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <!-- Swiper JS for carousel -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <script>
+        // Fix headings - ensure they have proper prose styling
+        document.querySelectorAll('#post-content h1, #post-content h2, #post-content h3, #post-content h4, #post-content h5, #post-content h6').forEach(h => {
+            if (!h.classList.contains('prose')) {
+                h.classList.add('prose-heading');
+            }
+        });
+
+        // Fix syntax highlighting - add language class to code blocks for Prism.js
+        document.querySelectorAll('#post-content pre code').forEach(block => {
+            const lang = block.className.match(/language-(\w+)/);
+            if (lang) {
+                block.parentElement.classList.add('line-numbers');
+                block.parentElement.dataset.language = lang[1];
+            }
+            Prism.highlightElement(block);
+        });
+
+        // Fix task lists - add contains-task-list class to parent UL
+        document.querySelectorAll('#post-content ul').forEach(ul => {
+            if (ul.querySelector('input[type="checkbox"]')) {
+                ul.classList.add('contains-task-list');
+                ul.querySelectorAll('li').forEach(li => {
+                    li.classList.add('task-list-item');
+                });
+            }
+        });
+
+        // Fix tables - remove inline styles from markdown parser
+        document.querySelectorAll('#post-content table').forEach(table => {
+            // Remove inline styles on th/td
+            table.querySelectorAll('th, td').forEach(cell => {
+                cell.removeAttribute('style');
+            });
+            // Ensure thead exists
+            if (!table.querySelector('thead')) {
+                const firstRow = table.querySelector('tr');
+                if (firstRow) {
+                    const thead = document.createElement('thead');
+                    const tbody = document.createElement('tbody');
+                    // Move first row to thead
+                    thead.appendChild(firstRow.cloneNode(true));
+                    firstRow.remove();
+                    table.insertBefore(thead, table.firstChild);
+                    // Move remaining rows to tbody
+                    table.querySelectorAll('tr').forEach(tr => tbody.appendChild(tr));
+                    table.appendChild(tbody);
+                }
+            }
+        });
+
+        // Convert gallery divs to Swiper carousel
+        document.querySelectorAll('#post-content .gallery').forEach((gallery, index) => {
+            const images = gallery.querySelectorAll('img');
+            if (images.length > 1) {
+                const swiperWrapper = document.createElement('div');
+                swiperWrapper.className = 'gallery-swiper swiper';
+                swiperWrapper.innerHTML = `
+                    <div class="swiper-wrapper"></div>
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                `;
+                
+                const slideWrapper = swiperWrapper.querySelector('.swiper-wrapper');
+                images.forEach(img => {
+                    const slide = document.createElement('div');
+                    slide.className = 'swiper-slide';
+                    slide.appendChild(img.cloneNode(true));
+                    slideWrapper.appendChild(slide);
+                });
+                
+                gallery.parentNode.replaceChild(swiperWrapper, gallery);
+                
+                // Initialize Swiper
+                new Swiper(swiperWrapper, {
+                    slidesPerView: 1,
+                    spaceBetween: 0,
+                    loop: true,
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                    autoplay: {
+                        delay: 5000,
+                        disableOnInteraction: false,
+                    },
+                    centeredSlides: true,
+                });
+            }
+        });
+
+        // Add anchor links to headings on hover
+        document.querySelectorAll('#post-content h1, #post-content h2, #post-content h3, #post-content h4').forEach(heading => {
+            const id = heading.id || heading.textContent.toLowerCase().replace(/[^\w]+/g, '-');
+            heading.id = id;
+            const anchor = document.createElement('a');
+            anchor.href = '#' + id;
+            anchor.className = 'heading-anchor absolute -left-8 opacity-0 transition-opacity text-primary-500 hover:text-primary-600';
+            anchor.innerHTML = '#';
+            anchor.title = 'Link to this section';
+            heading.style.position = 'relative';
+            heading.appendChild(anchor);
+            
+            heading.addEventListener('mouseenter', () => anchor.style.opacity = '1');
+            heading.addEventListener('mouseleave', () => anchor.style.opacity = '0');
+        });
+    </script>
 </body>
 </html>
