@@ -41,10 +41,10 @@ clone_template() {
         local src_template_dir="$temp_dir/templates/$template_name"
         
         if [ -d "$src_template_dir" ]; then
-            mkdir -p "$target_dir"
+            mkdir -p "$target_dir/$template_name"
             # Copy template files
-            cp -r "$src_template_dir"/* "$target_dir/"
-            echo "Template '$template_name' cloned successfully to $target_dir"
+            cp -r "$src_template_dir"/* "$target_dir/$template_name/"
+            echo "Template '$template_name' cloned successfully to $target_dir/$template_name"
         else
             echo "ERROR: Template '$template_name' not found in repository"
             echo "Available templates:"
