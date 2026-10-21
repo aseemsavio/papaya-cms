@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block meta %}
+<title>{{ site_name }} — Journal</title>
+<meta name="description" content="{{ site_description }}">
+<link rel="canonical" href="{{ base_url }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site_name }}">
+<meta property="og:title" content="{{ site_name }}">
+<meta property="og:description" content="{{ site_description }}">
+<meta property="og:url" content="{{ base_url }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ site_name }}">
+<meta name="twitter:description" content="{{ site_description }}">
+{% if posts %}
+{% set featured = posts | first %}
+{% if featured.cover_image %}<meta property="og:image" content="{{ featured.cover_image }}">
+{% endif %}
+{% endif %}
+{% endblock meta %}
+
+{% block content %}
+<main class="wrap">
+    <section class="hero">
+        <div class="hero-mark" aria-hidden="true">{{ site_name | truncate(length=1, end="") }}</div>
+        <p class="kicker">Journal</p>
+        <h1 class="wordmark">{{ site_name }}</h1>
+        <p class="tagline">{{ site_description }}</p>
+        <hr class="hero-rule">
+    </section>
+
+    <section aria-labelledby="latest-heading">
+        <div class="index-head">
+            <h2 class="index-label" id="latest-heading">Latest entries</h2>
+            <span class="index-count">{{ posts | length }} {% if posts | length == 1 %}entry{% else %}entries{% endif %}</span>
+        </div>
+
+        {% if posts %}
+        <div class="entries">
+            {% for post in posts %}
+            <article class="entry{% if loop.first %} is-featured{% endif %}">
+                <a class="entry-link" href="/posts/{{ post.slug }}">
+                    <div class="entry-main">
+                        <div class="entry-meta">
+                            <time datetime="{{ post.date_rfc3339 }}">{{ post.date_display }}</time>
+                            {% if post.author %}
+                            <span class="dot">·</span>
+                            <span>{{ post.author }}</span>
+                            {% endif %}
+                        </div>
+
+                        <h3 class="entry-title">{{ post.title }}</h3>
+
+                        {% if post.summary %}
+                        <p class="entry-summary">{{ post.summary }}</p>
+                        {% endif %}
+
+                        {% if post.tags %}
+                        <ul class="entry-tags">
+                            {% for tag in post.tags %}
+                            <li><span class="tag">{{ tag }}</span></li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+
+                        <span class="entry-more">Read entry <span aria-hidden="true">→</span></span>
+                    </div>
+
+                    {% if post.cover_image %}
+                    <div class="entry-thumb">
+                        <img src="{{ post.cover_image }}" alt="{{ post.title }}" loading="lazy" decoding="async">
+                    </div>
+                    {% endif %}
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty">
+            <p class="empty-title">Nothing published yet</p>
+            <p class="empty-copy">Add a Markdown file to the <code>markdown/</code> prefix in your bucket, then refresh the cache.</p>
+        </div>
+        {% endif %}
+    </section>
+</main>
+{% endblock content %}

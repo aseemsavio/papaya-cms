@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Tide — concentric arcs in sage">
+  <defs>
+    <linearGradient id="t1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0f0f"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+    <linearGradient id="t2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8cb4aa" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#8cb4aa" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#t1)"/>
+  <g fill="none" stroke="url(#t2)" stroke-width="1.6">
+    <path d="M-40 760 C 320 520, 620 520, 980 700 S 1560 560, 1660 420"/>
+    <path d="M-40 820 C 320 580, 620 580, 980 760 S 1560 620, 1660 480" stroke-opacity="0.78"/>
+    <path d="M-40 880 C 320 640, 620 640, 980 820 S 1560 680, 1660 540" stroke-opacity="0.56"/>
+    <path d="M-40 700 C 320 460, 620 460, 980 640 S 1560 500, 1660 360" stroke-opacity="0.5"/>
+    <path d="M-40 640 C 320 400, 620 400, 980 580 S 1560 440, 1660 300" stroke-opacity="0.34"/>
+  </g>
+  <g fill="#b4e650">
+    <circle cx="980" cy="700" r="4.5" fill-opacity="0.9"/>
+    <circle cx="430" cy="470" r="3" fill-opacity="0.6"/>
+    <circle cx="1380" cy="330" r="3" fill-opacity="0.45"/>
+  </g>
+</svg>

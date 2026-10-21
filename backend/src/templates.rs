@@ -27,18 +27,34 @@ impl TemplateEngine {
             Self::clone_template_repo(template_repo, &template_path).await?;
         }
 
-        let mut tera = Tera::default();
-        let pattern = format!("{}/**/*", template_path.display());
+        // Collect every template file first and register them in a single batch.
+        // Registering one by one would break `{% extends %}` / `{% include %}`
+        // whenever a child template is loaded before its parent/partial.
+        // Canonicalising first keeps relative paths ("./templates/x") working.
+        let root = std::fs::canonicalize(&template_path)?;
+        let pattern = format!("{}/**/*", root.display());
+        let mut sources: Vec<(String, String)> = Vec::new();
         for entry in glob(&pattern).map_err(|e| anyhow::anyhow!("glob pattern error: {}", e))? {
             let path = entry.map_err(|e| anyhow::anyhow!("glob entry error: {}", e))?;
             if path.is_file() {
                 let content = std::fs::read_to_string(&path)?;
-                let relative_path = path.strip_prefix(&template_path)
+                let resolved = std::fs::canonicalize(&path).unwrap_or(path);
+                let relative_path = resolved.strip_prefix(&root)
                     .map_err(|e| anyhow::anyhow!("strip prefix error: {}", e))?;
-                let name = relative_path.to_string_lossy().to_string();
-                tera.add_raw_template(&name, &content)?;
+                let name = relative_path.to_string_lossy().replace('\\', "/");
+                sources.push((name, content));
             }
         }
+
+        if sources.is_empty() {
+            return Err(AppError::Template(format!(
+                "No template files found in {}",
+                template_path.display()
+            )));
+        }
+
+        let mut tera = Tera::default();
+        tera.add_raw_templates(sources)?;
 
         Ok(Self {
             tera: Arc::new(tera),
