@@ -196,6 +196,46 @@ cargo run --release
 - Images with captions (using figure/figcaption)
 - Galleries (images with class="gallery")
 
+## Otia Theme
+
+`templates/otia/` ships a dark-only editorial theme inspired by the Otia studio
+site: near-black canvas (`#050505`), ambient radial glow, film grain, Playfair
+Display headings with Source Serif 4 body and JetBrains Mono code, thin
+hairlines, and a single sage/mint/lime accent budget.
+
+Run it locally:
+
+```bash
+./target/debug/papaya-backend --template-dir ./templates --template-name otia
+```
+
+### Component map
+
+The theme's runtime (`partials/scripts.html`) upgrades plain markdown output:
+framed code blocks with language label + copy button, wrapped tables, typed
+callouts, task-list styling, heading anchors, footnote grouping, image
+lightbox, carousels, and Mermaid diagrams (dark themed, rendered client-side;
+Prism + Mermaid load via CDN with `defer`).
+
+| Author this markdown | Renders as |
+|---|---|
+| `#`–`######` headings | Display type, auto anchor-linkable |
+| `> [!NOTE]` `[!TIP]` `[!IMPORTANT]` `[!WARNING]` `[!CAUTION]` | Typed callouts (GitHub style) |
+| Plain `>` blockquotes | Pull quote; `<cite>` styled |
+| ```` ```lang ```` | Framed code block, Prism highlight, copy button |
+| ```` ```mermaid ```` | Dark-themed Mermaid diagram |
+| ```` ```carousel ```` (`src \| caption` per line) | Carousel (arrows, dots, counter, drag, autoplay) |
+| `<div class="gallery">` with `<img>`s | Same carousel (legacy markup) |
+| `![alt](src)` / `<figure><img><figcaption>` | Ringed image, lightbox on click (Esc closes) |
+| GFM table | Hairline table, header tint, aligned columns |
+| `[^1]` footnotes | Grouped "Notes" section at the end |
+| `- [ ]` / `- [x]` | Selectable-style task list |
+| `<dl>`, `<details>` | Styled definition list / disclosure |
+| `~~strike~~`, `` `code` ``, `<kbd>`, `<mark>` | Inline marks |
+
+Carousel slides intentionally skip the lightbox (they are navigable inline);
+prose images feed it.
+
 ## License
 
 MIT

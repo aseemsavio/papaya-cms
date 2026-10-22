@@ -126,6 +126,8 @@ async fn home_handler(State(state): State<AppState>) -> Result<Html<String>, App
     context.insert("site_name", &state.config.site.name);
     context.insert("site_description", &state.config.site.description);
 
+    context.insert("base_url", &state.config.site.base_url);
+
     let html = state.templates.render("home.html", &context)?;
     Ok(Html(html))
 }
@@ -148,6 +150,9 @@ async fn post_handler(
     context.insert("post", &post);
     context.insert("content", &html_content);
     context.insert("site_name", &state.config.site.name);
+    context.insert("site_description", &state.config.site.description);
+    context.insert("base_url", &state.config.site.base_url);
+    context.insert("posts", &state.cache.get_posts().await);
 
     let html = state.templates.render("post.html", &context)?;
     Ok(Html(html))

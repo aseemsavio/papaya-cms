@@ -114,7 +114,6 @@ impl Cache {
         info!("Found {} objects in S3 under markdown/ prefix", keys.len());
 
         let mut posts = Vec::new();
-        let mut slug_index = HashMap::new();
         let mut loaded_count = 0;
 
         for key in keys {
@@ -146,8 +145,6 @@ impl Cache {
 
             match PostMetadata::from_frontmatter(slug.to_string(), &frontmatter) {
                 Ok(post) => {
-                    let index = posts.len();
-                    slug_index.insert(post.slug.clone(), index);
                     posts.push(post.clone());
                     loaded_count += 1;
                     info!("Loaded blog post: {} (title: {}, date: {})", post.slug, post.title, post.date_display);
@@ -158,7 +155,15 @@ impl Cache {
             }
         }
 
+        // Sort newest-first BEFORE building the slug index, otherwise the stored
+        // indices would point at the wrong posts after the reorder.
         posts.sort_by(|a, b| b.date.cmp(&a.date));
+
+        let slug_index: HashMap<String, usize> = posts
+            .iter()
+            .enumerate()
+            .map(|(index, post)| (post.slug.clone(), index))
+            .collect();
 
         {
             let mut posts_lock = self.posts.write().unwrap();
