@@ -209,10 +209,6 @@ Run it locally:
 ./target/debug/papaya-backend --template-dir ./templates --template-name otia
 ```
 
-Use the showcase post to see every component at once — it is in
-`sample-content/markdown/otia-design-system.md` (upload it to your `markdown/`
-prefix first).
-
 ### Component map
 
 The theme's runtime (`partials/scripts.html`) upgrades plain markdown output:
