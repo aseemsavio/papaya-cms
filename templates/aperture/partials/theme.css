@@ -1084,6 +1084,10 @@ body.is-indexing .gallery-ui {
 .post-frame {
     display: block;
     width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
 }
 
 .post-frame img {
@@ -1507,41 +1511,50 @@ body.post-ready .post-hero img {
 }
 
 /* --------------------------------------------------------------------------
-   Page transition (thumbnail to full frame)
+   Full-screen photograph (post page)
    -------------------------------------------------------------------------- */
 
-.page-transition {
+.lightbox {
     position: fixed;
     inset: 0;
-    z-index: 110;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.page-transition img {
-    position: absolute;
-    display: block;
-    object-fit: cover;
-    filter: saturate(0.94);
-}
-
-.transition-veil {
-    position: absolute;
-    inset: 0;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--frame-pad);
     background: var(--paper);
+    cursor: zoom-out;
     opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.45s ease,
+        visibility 0.45s ease;
 }
 
-body.is-transitioning .site-head,
-body.is-transitioning main,
-body.is-transitioning .site-footer,
-body.is-transitioning .edge-label {
-    opacity: 0.14;
-    transition: opacity 0.35s ease;
+.lightbox.is-open {
+    opacity: 1;
+    visibility: visible;
 }
 
-body.is-transitioning .cursor {
-    opacity: 0;
+.lightbox img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: saturate(0.94) contrast(1.01);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: calc(var(--head-h) / 2 - 17px);
+    right: clamp(20px, 4vw, 56px);
+    cursor: pointer;
+}
+
+body.is-lightbox {
+    overflow: hidden;
 }
 
 /* --------------------------------------------------------------------------

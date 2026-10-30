@@ -508,71 +508,8 @@
     function onGalleryClick(event) {
         var tile = event.target.closest ? event.target.closest("a.tile") : null;
         if (!tile) return;
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
 
         saveGalleryReturn();
-
-        if (reduceMotion) return;
-
-        var img = $("img", tile);
-        var to = tile.getBoundingClientRect();
-        var source = img && (img.currentSrc || img.src);
-        if (!source) return;
-
-        event.preventDefault();
-
-        // The clone lands on the framed position of the post page — the same
-        // rectangle the photograph occupies there: edge to edge inside the
-        // page margin, at its natural aspect ratio.
-        var vw = window.innerWidth;
-        var headH = header ? header.offsetHeight : 0;
-        var pad = Math.min(26, Math.max(14, vw * 0.02));
-        var imgW = (img && img.naturalWidth) || to.width;
-        var imgH = (img && img.naturalHeight) || to.height;
-        var endW = Math.max(1, vw - pad * 2);
-        var endH = endW * (imgH / imgW);
-        var endLeft = pad;
-        var endTop = headH + pad;
-
-        var overlay = doc.createElement("div");
-        overlay.className = "page-transition";
-
-        var clone = doc.createElement("img");
-        clone.src = source;
-        clone.alt = "";
-        clone.style.left = to.left + "px";
-        clone.style.top = to.top + "px";
-        clone.style.width = to.width + "px";
-        clone.style.height = to.height + "px";
-        clone.style.transition =
-            "left 0.62s cubic-bezier(0.16,1,0.3,1), top 0.62s cubic-bezier(0.16,1,0.3,1), width 0.62s cubic-bezier(0.16,1,0.3,1), height 0.62s cubic-bezier(0.16,1,0.3,1), filter 0.62s ease, opacity 0.4s ease";
-
-        overlay.appendChild(clone);
-        doc.body.appendChild(overlay);
-        body.classList.add("is-transitioning");
-
-        var target = tile.getAttribute("href");
-
-        raf(function () {
-            raf(function () {
-                clone.style.left = endLeft + "px";
-                clone.style.top = endTop + "px";
-                clone.style.width = endW + "px";
-                clone.style.height = endH + "px";
-                clone.style.filter = "saturate(1)";
-            });
-        });
-
-        var done = false;
-        function go() {
-            if (done) return;
-            done = true;
-            window.location.href = target;
-        }
-
-        window.setTimeout(go, 600);
-        // A refresh or a slow image should still land on the post.
-        window.setTimeout(go, 1500);
     }
 
     /* ----------------------------------------------------------------------
@@ -629,6 +566,31 @@
         }
 
         updateReading();
+        initLightbox();
+    }
+
+    function initLightbox() {
+        var box = $("#lightbox");
+        var trigger = postHero ? $(".post-frame", postHero) : null;
+        if (!box || !trigger) return;
+
+        function open() {
+            box.classList.add("is-open");
+            box.setAttribute("aria-hidden", "false");
+            body.classList.add("is-lightbox");
+        }
+
+        function close() {
+            box.classList.remove("is-open");
+            box.setAttribute("aria-hidden", "true");
+            body.classList.remove("is-lightbox");
+        }
+
+        trigger.addEventListener("click", open);
+        box.addEventListener("click", close);
+        doc.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") close();
+        });
     }
 
     function updateReading() {
@@ -723,10 +685,6 @@
             window.addEventListener("pageshow", function (event) {
                 if (!event.persisted) return;
 
-                var overlay = $(".page-transition");
-                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-
-                body.classList.remove("is-transitioning");
                 updateGallery(true);
             });
 

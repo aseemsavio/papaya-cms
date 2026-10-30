@@ -253,9 +253,10 @@ sets. The home page opens with an editorial cover — the newest frame tucked
 under an oversized Bodoni wordmark — then turns vertical scroll into a
 horizontal filmstrip of full-height photographs. Tiles are virtualized: only
 the frames near the viewport exist in the DOM, off-screen images are released,
-and they are requested again when you scroll back. A custom cursor, clip-path
-reveals, and a thumbnail-to-full-frame page transition stay out of the way of
-the photographs.
+and they are requested again when you scroll back. A custom cursor and clip-path
+reveals stay out of the way of the photographs. Clicking a photograph opens its
+post page directly; clicking the photograph there opens it full screen over the
+page, and Escape or a click closes it.
 
 The post page shows the photograph edge to edge inside a small paper margin, at
 its own aspect ratio and never cropped — portrait frames continue below the

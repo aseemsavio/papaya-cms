@@ -32,15 +32,20 @@
     <article class="post">
         {% if post.cover_image %}
         <figure class="post-hero" style="--hero-color: {{ post.photo.color | default(value='#e7e4dd') }}">
-            <div class="post-frame">
+            <button type="button" class="post-frame" aria-label="View photograph full screen">
                 <img src="{{ post.cover_image }}" alt="{{ post.title }}" fetchpriority="high" decoding="async">
-            </div>
+            </button>
             <figcaption class="post-frame-caption">
                 <span>Frame {{ post_number }} / {{ post_total }}</span>
                 {% if post.photo.location %}<span class="caption-place">{{ post.photo.location }}</span>{% endif %}
                 <a class="caption-read" href="#post-content">Read the note <span aria-hidden="true">&darr;</span></a>
             </figcaption>
         </figure>
+
+        <div class="lightbox" id="lightbox" aria-hidden="true">
+            <button type="button" class="nav-pill lightbox-close">Close</button>
+            <img src="{{ post.cover_image }}" alt="{{ post.title }}">
+        </div>
         {% endif %}
 
         <div class="post-content" id="post-content">
