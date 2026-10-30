@@ -164,6 +164,7 @@ cargo run --release
 ### home.html
 - `site_name` - Site name from config
 - `site_description` - Site description from config
+- `home_description` - `site.home_description` from config, falling back to `site.description` when empty
 - `posts` - Array of post metadata objects
 
 ### post.html

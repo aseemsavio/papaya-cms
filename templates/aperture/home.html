@@ -2,12 +2,12 @@
 
 {% block meta %}
 <title>{{ site_name }} — Photographic archive</title>
-<meta name="description" content="{{ site_description }}">
+<meta name="description" content="{{ home_description }}">
 <link rel="canonical" href="{{ base_url }}/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{{ site_name }}">
 <meta property="og:title" content="{{ site_name }} — Photographic archive">
-<meta property="og:description" content="{{ site_description }}">
+<meta property="og:description" content="{{ home_description }}">
 <meta property="og:url" content="{{ base_url }}/">
 <meta name="twitter:card" content="summary_large_image">
 {% if posts %}
@@ -56,6 +56,10 @@
                 <span class="hero-caption-place">{{ latest.photo.location }}</span>
                 {% endif %}
             </a>
+
+            {% if home_description %}
+            <p class="hero-description">{{ home_description }}</p>
+            {% endif %}
         </div>
 
         <div class="hero-foot">
@@ -89,7 +93,7 @@
                     <div class="gallery-end" id="gallery-end">
                         <p class="eyebrow"><span class="dot" aria-hidden="true"></span> End of roll</p>
                         <p class="end-title">{{ site_name }}</p>
-                        <p class="end-copy">{{ site_description }}</p>
+                        <p class="end-copy">{{ home_description }}</p>
                         <a class="end-link" href="#top">Return to start <span aria-hidden="true">↑</span></a>
                     </div>
                 </div>

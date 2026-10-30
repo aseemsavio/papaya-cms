@@ -125,6 +125,12 @@ async fn home_handler(State(state): State<AppState>) -> Result<Html<String>, App
     context.insert("posts", &posts);
     context.insert("site_name", &state.config.site.name);
     context.insert("site_description", &state.config.site.description);
+    let home_description = if state.config.site.home_description.is_empty() {
+        &state.config.site.description
+    } else {
+        &state.config.site.home_description
+    };
+    context.insert("home_description", home_description);
 
     context.insert("base_url", &state.config.site.base_url);
     context.insert("now_year", &chrono::Utc::now().format("%Y").to_string());

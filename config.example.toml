@@ -18,6 +18,8 @@ force_path_style = false
 [site]
 name = "Papaya Blog"
 description = "A lightweight, fast blog platform"
+# Optional: shown on the home page. Leave empty to reuse `description`.
+home_description = ""
 base_url = "https://your-domain.com"
 
 [api]

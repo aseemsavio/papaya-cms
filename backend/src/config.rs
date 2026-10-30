@@ -33,6 +33,9 @@ pub struct S3Config {
 pub struct SiteConfig {
     pub name: String,
     pub description: String,
+    /// Optional description for the home page. Falls back to `description` when empty.
+    #[serde(default)]
+    pub home_description: String,
     pub base_url: String,
 }
 

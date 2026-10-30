@@ -300,7 +300,7 @@ body.is-ready .hero-year {
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: clamp(300px, 60svh, 700px);
+    min-height: clamp(280px, 50svh, 640px);
 }
 
 .hero-wordmark {
@@ -420,6 +420,26 @@ body.is-ready .hero-caption {
     font-size: 9px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
+}
+
+.hero-description {
+    max-width: 640px;
+    margin: 0 0 clamp(10px, 3vh, 28px);
+    padding: 0 16px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.7;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+        opacity 0.8s ease 0.7s,
+        transform 0.9s var(--ease) 0.7s;
+}
+
+body.is-ready .hero-description {
+    opacity: 1;
+    transform: none;
 }
 
 .hero-foot {
