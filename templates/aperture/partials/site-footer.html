@@ -1,0 +1,26 @@
+{#- The archive closes with a quiet, oversized signature. -#}
+<footer class="site-footer{% if post %} site-footer--slim{% endif %}" id="footer">
+    {% if post %}
+    <div class="footer-slim">
+        <a class="footer-link" href="/"><span aria-hidden="true">←</span> Back to index</a>
+        <p class="footer-fine">© {{ now_year }} {{ site_name }}</p>
+        <a class="footer-link" href="#top">Top <span aria-hidden="true">↑</span></a>
+    </div>
+    {% else %}
+    <div class="footer-top">
+        <p class="eyebrow"><span class="dot" aria-hidden="true"></span> End of archive</p>
+        <a class="footer-link" href="#top">Back to top <span aria-hidden="true">↑</span></a>
+    </div>
+
+    <p class="footer-wordmark" aria-hidden="true">{{ site_name }}</p>
+
+    <div class="footer-bottom">
+        <p class="footer-desc">{{ site_description }}</p>
+        <div class="footer-meta">
+            <a class="footer-link" href="mailto:hello@still.photo">Prints &amp; commissions</a>
+            <span class="footer-sep" aria-hidden="true">/</span>
+            <p class="footer-fine">© {{ now_year }} {{ site_name }}</p>
+        </div>
+    </div>
+    {% endif %}
+</footer>

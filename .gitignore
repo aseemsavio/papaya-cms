@@ -19,6 +19,10 @@ config.toml
 # Logs
 *.log
 
+# Local demo content & MinIO volume
+.local-content/
+.minio-data/
+
 # Templates (cloned at runtime - override with local templates)
 # /templates
 

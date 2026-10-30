@@ -18,8 +18,13 @@ pub struct PostMetadata {
     pub date: DateTime<Utc>,
     pub date_rfc3339: String,
     pub date_display: String,
+    pub date_year: String,
     pub tags: Vec<String>,
     pub cover_image: Option<String>,
+    /// Free-form photography metadata (aperture, shutter, focal length, etc.)
+    /// straight from the Markdown frontmatter. Always an object so themes can
+    /// safely probe `post.photo.aperture` without guarding for null.
+    pub photo: serde_json::Value,
 }
 
 impl PostMetadata {
@@ -64,6 +69,7 @@ impl PostMetadata {
 
         let date_rfc3339 = date.to_rfc3339();
         let date_display = date.format("%B %d, %Y").to_string();
+        let date_year = date.format("%Y").to_string();
 
         let tags = frontmatter
             .get("tags")
@@ -80,6 +86,12 @@ impl PostMetadata {
             .and_then(|v| v.as_str())
             .map(|s| s.to_string());
 
+        let photo = frontmatter
+            .get("photo")
+            .filter(|v| v.is_object())
+            .cloned()
+            .unwrap_or_else(|| serde_json::json!({}));
+
         Ok(Self {
             title,
             slug,
@@ -88,8 +100,10 @@ impl PostMetadata {
             date,
             date_rfc3339,
             date_display,
+            date_year,
             tags,
             cover_image,
+            photo,
         })
     }
 }
