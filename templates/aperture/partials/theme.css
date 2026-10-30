@@ -423,18 +423,21 @@ body.is-ready .hero-caption {
 }
 
 .hero-description {
-    max-width: 640px;
+    max-width: 760px;
     margin: 0 0 clamp(10px, 3vh, 28px);
     padding: 0 16px;
-    color: var(--ink-soft);
-    font-size: 13px;
-    line-height: 1.7;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 19px;
+    font-style: italic;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
     text-align: center;
     opacity: 0;
     transform: translateY(10px);
     transition:
-        opacity 0.8s ease 0.7s,
-        transform 0.9s var(--ease) 0.7s;
+        opacity 0.8s ease 0.55s,
+        transform 0.9s var(--ease) 0.55s;
 }
 
 body.is-ready .hero-description {

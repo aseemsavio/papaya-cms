@@ -49,14 +49,6 @@
                 {% endif %}
             </div>
 
-            <a class="hero-caption" href="/posts/{{ latest.slug }}">
-                <span class="hero-caption-title">{{ latest.title }}</span>
-                {% if latest.photo.location %}
-                <span class="hero-caption-dash" aria-hidden="true">—</span>
-                <span class="hero-caption-place">{{ latest.photo.location }}</span>
-                {% endif %}
-            </a>
-
             {% if home_description %}
             <p class="hero-description">{{ home_description }}</p>
             {% endif %}
