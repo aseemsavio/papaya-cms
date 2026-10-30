@@ -125,8 +125,15 @@ async fn home_handler(State(state): State<AppState>) -> Result<Html<String>, App
     context.insert("posts", &posts);
     context.insert("site_name", &state.config.site.name);
     context.insert("site_description", &state.config.site.description);
+    let home_description = if state.config.site.home_description.is_empty() {
+        &state.config.site.description
+    } else {
+        &state.config.site.home_description
+    };
+    context.insert("home_description", home_description);
 
     context.insert("base_url", &state.config.site.base_url);
+    context.insert("now_year", &chrono::Utc::now().format("%Y").to_string());
 
     let html = state.templates.render("home.html", &context)?;
     Ok(Html(html))
@@ -146,13 +153,27 @@ async fn post_handler(
     let (_, markdown_body) = parse_frontmatter(&content)?;
     let html_content = markdown_to_html(&markdown_body);
 
+    let posts = state.cache.get_posts().await;
+    let current_index = posts.iter().position(|p| p.slug == post.slug);
+    let newer_post = current_index
+        .and_then(|i| if i > 0 { posts.get(i - 1).cloned() } else { None });
+    let older_post = current_index
+        .and_then(|i| posts.get(i + 1).cloned());
+    let post_number = current_index.map(|i| i + 1);
+    let post_total = posts.len();
+
     let mut context = Context::new();
     context.insert("post", &post);
     context.insert("content", &html_content);
     context.insert("site_name", &state.config.site.name);
     context.insert("site_description", &state.config.site.description);
     context.insert("base_url", &state.config.site.base_url);
-    context.insert("posts", &state.cache.get_posts().await);
+    context.insert("posts", &posts);
+    context.insert("newer_post", &newer_post);
+    context.insert("older_post", &older_post);
+    context.insert("post_number", &post_number);
+    context.insert("post_total", &post_total);
+    context.insert("now_year", &chrono::Utc::now().format("%Y").to_string());
 
     let html = state.templates.render("post.html", &context)?;
     Ok(Html(html))

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block meta %}
+<title>{{ site_name }} — Photographic archive</title>
+<meta name="description" content="{{ home_description }}">
+<link rel="canonical" href="{{ base_url }}/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site_name }}">
+<meta property="og:title" content="{{ site_name }} — Photographic archive">
+<meta property="og:description" content="{{ home_description }}">
+<meta property="og:url" content="{{ base_url }}/">
+<meta name="twitter:card" content="summary_large_image">
+{% if posts %}
+{% set meta_latest = posts | first %}
+{% if meta_latest.cover_image %}<meta property="og:image" content="{{ meta_latest.cover_image }}">{% endif %}
+{% endif %}
+{% endblock meta %}
+
+{% block body_class %}page-home{% endblock body_class %}
+
+{% block head_extra %}
+{% if posts %}
+{% set preload_latest = posts | first %}
+{% if preload_latest.cover_image %}
+<link rel="preload" as="image" href="{{ preload_latest.cover_image }}" fetchpriority="high">
+{% endif %}
+{% endif %}
+{% endblock head_extra %}
+
+{% block content %}
+<span id="top" class="anchor"></span>
+<main id="main">
+    {% if posts %}
+    {% set latest = posts | first %}
+
+    <section class="hero" id="hero" aria-label="{{ site_name }}">
+        <div class="hero-inner">
+            <p class="hero-year">({{ latest.date_year }})</p>
+
+            <div class="hero-stage">
+                <h1 class="hero-wordmark">
+                    <span class="hero-word" aria-label="{{ site_name }}">{{ site_name }}</span>
+                </h1>
+
+                {% if latest.cover_image %}
+                <figure class="hero-image" style="--hero-color: {{ latest.photo.color | default(value='#e7e4dd') }}">
+                    <img src="{{ latest.cover_image }}" alt="{{ latest.title }}" fetchpriority="high" decoding="async">
+                </figure>
+                {% endif %}
+            </div>
+
+            {% if home_description %}
+            <p class="hero-description">{{ home_description }}</p>
+            {% endif %}
+        </div>
+
+        <div class="hero-foot">
+            {% if latest.photo.location %}
+            <span class="hero-place"><span class="dot" aria-hidden="true"></span>{{ latest.photo.location }}</span>
+            {% else %}
+            <span class="hero-place"><span class="dot" aria-hidden="true"></span>{{ site_name }}</span>
+            {% endif %}
+
+            <a class="hero-scroll" href="#index">
+                <span>Scroll to explore</span>
+                <span class="hero-scroll-line" aria-hidden="true"></span>
+            </a>
+
+            <span class="hero-edition">Vol. 01 <span class="dash">—</span> {{ posts | length }} frames</span>
+        </div>
+
+        <p class="edge-label" aria-hidden="true">{{ site_name }} <span class="dash">—</span> Photographic archive <span class="dash">—</span> {{ latest.date_year }}</p>
+    </section>
+
+    <section class="gallery" id="index" aria-label="Photographic index">
+        <div class="gallery-pin" id="gallery-pin">
+            <div class="gallery-label" aria-hidden="true">
+                <span class="dot"></span>
+                <span>Selected frames</span>
+                <span class="gallery-label-count">{{ posts | length }}</span>
+            </div>
+
+            <div class="gallery-viewport">
+                <div class="gallery-track" id="gallery-track">
+                    <div class="gallery-end" id="gallery-end">
+                        <p class="eyebrow"><span class="dot" aria-hidden="true"></span> End of roll</p>
+                        <p class="end-title">{{ site_name }}</p>
+                        <p class="end-copy">{{ home_description }}</p>
+                        <a class="end-link" href="#top">Return to start <span aria-hidden="true">↑</span></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gallery-ui">
+                <div class="gallery-progress" aria-hidden="true"><span id="gallery-progress-bar"></span></div>
+                <div class="gallery-bottom">
+                    <p class="gallery-hint" id="gallery-hint">
+                        <span class="hint-line" aria-hidden="true"></span>
+                        <span>Scroll down</span>
+                        <span class="hint-arrow" aria-hidden="true">→</span>
+                        <span class="hint-muted">move sideways</span>
+                    </p>
+                    <p class="gallery-count" aria-live="polite">
+                        <span id="gallery-current">01</span>
+                        <span class="count-sep" aria-hidden="true">/</span>
+                        <span>{{ posts | length }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script id="gallery-data" type="application/json">{{ posts | json_encode() | safe }}</script>
+    {% else %}
+    <section class="empty-stage">
+        <p class="eyebrow"><span class="dot"></span> Archive in progress</p>
+        <h1 class="empty-title">{{ site_name }}</h1>
+        <p class="empty-copy">No frames have been published yet. Add a Markdown file to the <code>markdown/</code> prefix in your bucket, then refresh the cache.</p>
+    </section>
+    {% endif %}
+</main>
+{% endblock content %}

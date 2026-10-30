@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block meta %}
+<title>{{ post.title }} — {{ site_name }}</title>
+{% if post.summary %}
+<meta name="description" content="{{ post.summary }}">
+{% else %}
+<meta name="description" content="{{ site_description }}">
+{% endif %}
+<link rel="canonical" href="{{ base_url }}/posts/{{ post.slug }}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="{{ site_name }}">
+<meta property="og:title" content="{{ post.title }}">
+{% if post.summary %}<meta property="og:description" content="{{ post.summary }}">{% endif %}
+<meta property="og:url" content="{{ base_url }}/posts/{{ post.slug }}">
+<meta property="article:published_time" content="{{ post.date_rfc3339 }}">
+{% if post.tags %}{% for tag in post.tags %}<meta property="article:tag" content="{{ tag }}">
+{% endfor %}{% endif %}
+{% if post.cover_image %}<meta property="og:image" content="{{ post.cover_image }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ post.title }}">
+{% if post.summary %}<meta name="twitter:description" content="{{ post.summary }}">{% endif %}
+{% endblock meta %}
+
+{% block body_class %}page-post{% endblock body_class %}
+
+{% block content %}
+<span id="top" class="anchor"></span>
+<main id="main" class="post-page">
+    <div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>
+
+    <article class="post">
+        {% if post.cover_image %}
+        <figure class="post-hero" style="--hero-color: {{ post.photo.color | default(value='#e7e4dd') }}">
+            <button type="button" class="post-frame" aria-label="View photograph full screen">
+                <img src="{{ post.cover_image }}" alt="{{ post.title }}" fetchpriority="high" decoding="async">
+            </button>
+            <figcaption class="post-frame-caption">
+                <span>Frame {{ post_number }} / {{ post_total }}</span>
+                {% if post.photo.location %}<span class="caption-place">{{ post.photo.location }}</span>{% endif %}
+                <a class="caption-read" href="#post-content">Read the note <span aria-hidden="true">&darr;</span></a>
+            </figcaption>
+        </figure>
+
+        <div class="lightbox" id="lightbox" aria-hidden="true">
+            <button type="button" class="nav-pill lightbox-close">Close</button>
+            <img src="{{ post.cover_image }}" alt="{{ post.title }}">
+        </div>
+        {% endif %}
+
+        <div class="post-content" id="post-content">
+            <p class="post-kicker">
+                <span>{{ post.date_display }}</span>
+                {% if post.author %}<span class="dot" aria-hidden="true"></span><span>{{ post.author }}</span>{% endif %}
+                {% if post.photo.location %}<span class="dot" aria-hidden="true"></span><span>{{ post.photo.location }}</span>{% endif %}
+                {% if post.photo.film %}<span class="dot" aria-hidden="true"></span><span>{{ post.photo.film }}</span>{% endif %}
+            </p>
+
+            <h1 class="post-title">{{ post.title }}</h1>
+
+            <div class="post-description">
+                {% if content %}
+                {{ content | safe }}
+                {% elif post.summary %}
+                <p>{{ post.summary }}</p>
+                {% endif %}
+            </div>
+
+            {% if post.tags %}
+            <ul class="post-tags" aria-label="Tags">
+                {% for tag in post.tags %}
+                <li><span class="tag">{{ tag }}</span></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <section class="post-specs" aria-labelledby="specs-title">
+                <div class="specs-head">
+                    <h2 class="specs-title" id="specs-title">Capture details</h2>
+                    {% if post.photo.camera %}
+                    <p class="specs-sub">{{ post.photo.camera }}{% if post.photo.lens %} <span class="dash">—</span> {{ post.photo.lens }}{% endif %}</p>
+                    {% endif %}
+                </div>
+
+                <div class="specs-grid">
+                    {% if post.author %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.8 20.2c1.4-3.6 4-5.4 7.2-5.4s5.8 1.8 7.2 5.4"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Photographer</span><span class="spec-value">{{ post.author }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.camera %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5h3l1.4-2h8.2l1.4 2h3v10h-17z"/><circle cx="12" cy="13.4" r="3.1"/><path d="M17.4 10.8h.01"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Camera</span><span class="spec-value">{{ post.photo.camera }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.lens %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><path d="M9 8.7a4 4 0 013-1.2"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Lens</span><span class="spec-value">{{ post.photo.lens }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.focal_length %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M7 8l-4 4 4 4"/><path d="M17 8l4 4-4 4"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Focal length</span><span class="spec-value">{{ post.photo.focal_length }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.aperture %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3l4.6 7.9M20.9 12h-9M16.6 20.9L12 13M7.4 20.9L12 13M3.1 12h9M7.4 3.1L12 11"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Aperture</span><span class="spec-value">{{ post.photo.aperture }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.shutter %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4.2l2.7 1.6"/><path d="M9.5 2.2h5"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Shutter</span><span class="spec-value">{{ post.photo.shutter }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.iso %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">ISO</span><span class="spec-value">{{ post.photo.iso }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.white_balance %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.7"/><path d="M12 3.3v17.4"/><path d="M12 3.3a8.7 8.7 0 010 17.4z" fill="currentColor" stroke="none"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">White balance</span><span class="spec-value">{{ post.photo.white_balance }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.film %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="1"/><path d="M7 5.5v13M17 5.5v13M3 9.5h4M3 14.5h4M17 9.5h4M17 14.5h4"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Medium</span><span class="spec-value">{{ post.photo.film }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if post.photo.location %}
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.2s7-5.3 7-11a7 7 0 10-14 0c0 5.7 7 11 7 11z"/><circle cx="12" cy="10.1" r="2.5"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Location</span><span class="spec-value">{{ post.photo.location }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    <div class="spec">
+                        <span class="spec-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="15" rx="1"/><path d="M8 3v5M16 3v5M3.5 10h17"/></svg>
+                        </span>
+                        <span class="spec-body"><span class="spec-label">Date</span><span class="spec-value">{{ post.date_display }}</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <nav class="post-nav" aria-label="Archive navigation">
+                {% if newer_post %}
+                <a class="post-nav-link" href="/posts/{{ newer_post.slug }}">
+                    <img class="post-nav-thumb" src="{{ newer_post.photo.thumb | default(value=newer_post.cover_image) }}" alt="" loading="lazy" decoding="async">
+                    <span class="post-nav-copy">
+                        <span class="post-nav-dir"><span aria-hidden="true">←</span> Newer frame</span>
+                        <span class="post-nav-title">{{ newer_post.title }}</span>
+                    </span>
+                </a>
+                {% else %}
+                <span class="post-nav-empty"></span>
+                {% endif %}
+
+                {% if older_post %}
+                <a class="post-nav-link post-nav-link--next" href="/posts/{{ older_post.slug }}">
+                    <span class="post-nav-copy">
+                        <span class="post-nav-dir">Older frame <span aria-hidden="true">→</span></span>
+                        <span class="post-nav-title">{{ older_post.title }}</span>
+                    </span>
+                    <img class="post-nav-thumb" src="{{ older_post.photo.thumb | default(value=older_post.cover_image) }}" alt="" loading="lazy" decoding="async">
+                </a>
+                {% else %}
+                <a class="post-nav-link post-nav-link--next" href="/">
+                    <span class="post-nav-copy">
+                        <span class="post-nav-dir">End of archive</span>
+                        <span class="post-nav-title">Back to the index <span aria-hidden="true">↗</span></span>
+                    </span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </article>
+</main>
+{% endblock content %}

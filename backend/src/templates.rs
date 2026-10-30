@@ -54,6 +54,10 @@ impl TemplateEngine {
         }
 
         let mut tera = Tera::default();
+        // Themes need to hand structured post data to their own JS.
+        tera.register_filter("json_encode", |value: tera::Value, _: tera::Kwargs, _: &tera::State| {
+            serde_json::to_string(&value).unwrap_or_else(|_| "[]".to_string())
+        });
         tera.add_raw_templates(sources)?;
 
         Ok(Self {

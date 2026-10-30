@@ -1,0 +1,19 @@
+{#- Fixed, feather-light header. Keeps the chrome out of the photographs. -#}
+<header class="site-head" id="site-head">
+    <a class="brand" href="/" aria-label="{{ site_name }} — home">
+        <span class="brand-mark">{{ site_name }}</span>
+        <span class="brand-dot" aria-hidden="true"></span>
+    </a>
+
+    <p class="head-center" aria-hidden="true">
+        {% if post %}
+            Frame {{ post_number }} <span class="head-slash">/</span> {{ post_total }}
+        {% else %}
+            Photographic archive <span class="head-slash">/</span> {{ posts | length }} frames
+        {% endif %}
+    </p>
+
+    <a class="nav-pill" href="{% if post %}/{% else %}#index{% endif %}">
+        {% if post %}<span class="pill-arrow" aria-hidden="true">←</span> {% endif %}Index
+    </a>
+</header>

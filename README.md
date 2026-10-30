@@ -39,13 +39,18 @@ A modern, high-performance blog platform built with Rust, Axum, Tera templates, 
 
 ```
 your-bucket/
-├── markdown/
-│   ├── my-first-post.md
-│   └── another-post.md
-└── assets/
-    ├── images/
-    └── videos/
+└── <root_folder>/
+    ├── markdown/
+    │   ├── my-first-post.md
+    │   └── another-post.md
+    └── assets/
+        ├── images/
+        └── videos/
 ```
+
+Everything for one site lives inside its `root_folder` (`s3.root_folder` in the
+config, required). Several blogs can share one bucket by giving each its own
+folder.
 
 ## Markdown Format
 
@@ -164,6 +169,7 @@ cargo run --release
 ### home.html
 - `site_name` - Site name from config
 - `site_description` - Site description from config
+- `home_description` - `site.home_description` from config, falling back to `site.description` when empty
 - `posts` - Array of post metadata objects
 
 ### post.html
@@ -179,10 +185,20 @@ cargo run --release
   summary: Option<String>,
   author: Option<String>,
   date: DateTime<Utc>,
+  date_rfc3339: String,
+  date_display: String,
+  date_year: String,
   tags: Vec<String>,
-  cover_image: Option<String>
+  cover_image: Option<String>,
+  photo: serde_json::Value  // free-form photography metadata
 }
 ```
+
+### post.html extras
+
+- `newer_post` / `older_post` — adjacent entries (or null at either end)
+- `post_number` / `post_total` — position in the archive, newest first
+- `now_year` — current year for footers
 
 ## Markdown Features
 
@@ -235,6 +251,90 @@ Prism + Mermaid load via CDN with `defer`).
 
 Carousel slides intentionally skip the lightbox (they are navigable inline);
 prose images feed it.
+
+## Aperture Theme
+
+`templates/aperture/` is a light-only photographic archive built for large image
+sets. The home page opens with an editorial cover — the newest frame tucked
+under an oversized Bodoni wordmark — then turns vertical scroll into a
+horizontal filmstrip of full-height photographs. Tiles are virtualized: only
+the frames near the viewport exist in the DOM, off-screen images are released,
+and they are requested again when you scroll back. A custom cursor and clip-path
+reveals stay out of the way of the photographs. Clicking a photograph opens its
+post page directly; clicking the photograph there opens it full screen over the
+page, and Escape or a click closes it.
+
+The post page shows the photograph edge to edge inside a small paper margin, at
+its own aspect ratio and never cropped — portrait frames continue below the
+fold and are read by scrolling. A
+caption row carries the frame number and location, then a quiet title, the
+story, and a capture-details grid: camera, lens, focal length, aperture,
+shutter, ISO, white balance, medium, location, and date. Every field is
+optional and rendered from Markdown. Returning to the index — with the back
+button or the Index link — restores the exact place on the filmstrip where the
+photograph was opened.
+
+### Photography frontmatter
+
+```markdown
+---
+title: "Still Water"
+slug: "still-water"
+date: "2026-09-18T07:12:00Z"
+summary: "First light on a lake that refused to move."
+author: "Aseem Savio"
+cover_image: "http://127.0.0.1:9000/papaya/assets/images/still-water.jpg"
+tags: ["Landscape", "Water"]
+photo:
+  camera: "Hasselblad X2D 100C"
+  lens: "XCD 45mm f/3.5"
+  aperture: "f/8"
+  shutter: "1/250"
+  iso: "64"
+  focal_length: "45mm"
+  white_balance: "Daylight · 5600K"
+  film: "Digital · medium format"
+  location: "Lake Bled, Slovenia"
+  aspect: 1.4995       # width / height, used to size the filmstrip
+  thumb: "http://127.0.0.1:9000/papaya/assets/images/still-water-thumb.jpg"
+  color: "#9799a2"     # placeholder colour while the image loads
+---
+
+Body copy in Markdown…
+```
+
+`aspect`, `thumb`, and `color` are optional but recommended: `thumb` keeps the
+home page light, `aspect` controls tile proportions before the image arrives,
+and `color` prevents a white flash.
+
+### Run the demo locally
+
+The theme works with any S3-compatible endpoint. This checkout was seeded
+against a local endpoint on `127.0.0.1:9000`:
+
+```bash
+# 1. Start a local S3-compatible server on port 9000
+#    (moto is used for the checked-in demo; MinIO works the same way)
+moto_server -H 127.0.0.1 -p 9000
+
+# 2. Download the demo frames into .local-content/images/<pexels-id>.jpg
+#    (these are intentionally git-ignored)
+
+# 3. Create thumbnails, Markdown, and upload everything
+python3 scripts/seed_aperture.py
+
+# 4. Run Papaya with the theme
+cargo run -- --template-dir ./templates --template-name aperture
+```
+
+Open <http://127.0.0.1:8080>.
+
+The seed script uses `S3_ENDPOINT`, `S3_BUCKET`, `S3_ROOT_FOLDER`,
+`S3_ACCESS_KEY`, and `S3_SECRET_KEY` (defaults match `config.toml`) and writes
+everything under `S3_ROOT_FOLDER`. It publishes that folder's `assets/*` for
+anonymous reads so the browser can load photographs directly from S3.
+`.local-content/` and `.minio-data/` are git-ignored; no photographs or
+generated Markdown are committed.
 
 ## License
 

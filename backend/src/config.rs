@@ -23,6 +23,8 @@ pub struct S3Config {
     pub endpoint: String,
     pub region: String,
     pub bucket: String,
+    /// Folder inside the bucket that holds this site's objects.
+    pub root_folder: String,
     pub access_key: String,
     pub secret_key: String,
     #[serde(default)]
@@ -33,6 +35,9 @@ pub struct S3Config {
 pub struct SiteConfig {
     pub name: String,
     pub description: String,
+    /// Optional description for the home page. Falls back to `description` when empty.
+    #[serde(default)]
+    pub home_description: String,
     pub base_url: String,
 }
 
@@ -65,6 +70,9 @@ impl Config {
         }
         if config.s3.bucket.is_empty() {
             return Err(ConfigError::Missing("S3 bucket is required".into()));
+        }
+        if config.s3.root_folder.trim_matches('/').is_empty() {
+            return Err(ConfigError::Missing("S3 root folder is required".into()));
         }
         if config.s3.access_key.is_empty() {
             return Err(ConfigError::Missing("S3 access key is required".into()));
