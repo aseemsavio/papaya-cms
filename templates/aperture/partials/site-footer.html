@@ -3,7 +3,7 @@
     {% if post %}
     <div class="footer-slim">
         <a class="footer-link" href="/"><span aria-hidden="true">←</span> Back to index</a>
-        <p class="footer-fine">© {{ now_year }} {{ site_name }}</p>
+        <p class="footer-fine">© {{ now_year }} {{ site_name }} · Built with <a class="footer-link" href="https://github.com/aseemsavio/papaya-cms" target="_blank" rel="noopener">Papaya CMS</a></p>
         <a class="footer-link" href="#top">Top <span aria-hidden="true">↑</span></a>
     </div>
     {% else %}
@@ -17,9 +17,7 @@
     <div class="footer-bottom">
         <p class="footer-desc">{{ site_description }}</p>
         <div class="footer-meta">
-            <a class="footer-link" href="mailto:hello@still.photo">Prints &amp; commissions</a>
-            <span class="footer-sep" aria-hidden="true">/</span>
-            <p class="footer-fine">© {{ now_year }} {{ site_name }}</p>
+            <p class="footer-fine">© {{ now_year }} {{ site_name }} · Built with <a class="footer-link" href="https://github.com/aseemsavio/papaya-cms" target="_blank" rel="noopener">Papaya CMS</a></p>
         </div>
     </div>
     {% endif %}
