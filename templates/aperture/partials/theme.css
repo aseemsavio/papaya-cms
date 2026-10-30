@@ -13,6 +13,7 @@
     --line: rgba(19, 18, 17, 0.13);
     --line-strong: rgba(19, 18, 17, 0.28);
     --head-h: 66px;
+    --frame-pad: clamp(14px, 2vw, 26px);
     --serif: "Bodoni Moda", "Didot", "Times New Roman", serif;
     --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -1067,86 +1068,99 @@ body.is-indexing .gallery-ui {
     transform-origin: 0 50%;
 }
 
+/* The photograph is shown at the largest size that still fits the screen,
+   with a quiet margin around it. Never cropped — every edge stays visible. */
 .post-hero {
     position: relative;
-    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     margin: 0;
-    background: var(--hero-color, var(--paper-deep));
-    overflow: hidden;
+    padding: var(--frame-pad);
+    background: var(--paper);
 }
 
-.post-hero.is-wide {
-    height: calc(100svh - var(--head-h));
-}
-
-.post-hero.is-wide img {
+.post-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    min-height: 0;
 }
 
-.post-hero.is-tall img {
+.post-frame img {
     display: block;
-    width: 100%;
+    width: auto;
     height: auto;
+    max-width: 100%;
+    max-height: calc(
+        100svh - var(--head-h) - var(--frame-pad) - var(--frame-pad) - 42px
+    );
+    background: var(--hero-color, var(--paper-deep));
+    box-shadow: inset 0 0 0 1px var(--line);
+    object-fit: contain;
+    filter: saturate(0.94) contrast(1.01);
 }
 
-.post-hero img {
-    filter: saturate(0.94) contrast(1.01);
+.post-frame-caption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    width: 100%;
+    padding: 12px 1px 0;
+    color: var(--ink-faint);
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.post-frame-caption .caption-place {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.post-frame-caption > span,
+.post-frame-caption > a {
+    white-space: nowrap;
+}
+
+@media (max-width: 400px) {
+    .post-frame-caption {
+        gap: 10px;
+        font-size: 7px;
+        letter-spacing: 0.15em;
+    }
+
+    .post-frame-caption .caption-place {
+        display: none;
+    }
+}
+
+.post-frame-caption .caption-read {
+    flex: 0 0 auto;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.post-frame-caption .caption-read:hover {
+    color: var(--ink);
 }
 
 .js .post-hero img {
     opacity: 0;
-    transform: scale(1.045);
-    clip-path: inset(0 0 8% 0);
+    transform: scale(0.985);
 }
 
 body.post-ready .post-hero img {
     opacity: 1;
     transform: none;
-    clip-path: inset(0 0 0 0);
     transition:
-        opacity 1s ease,
-        transform 1.5s var(--ease),
-        clip-path 1.3s var(--ease);
-}
-
-.post-scroll {
-    position: fixed;
-    bottom: 26px;
-    left: 50%;
-    z-index: 30;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: rgba(246, 245, 241, 0.86);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    color: var(--ink-soft);
-    font-size: 8px;
-    letter-spacing: 0.19em;
-    text-transform: uppercase;
-    transform: translateX(-50%);
-    transition:
-        opacity 0.45s ease,
-        transform 0.45s var(--ease);
-    pointer-events: none;
-}
-
-.post-scroll.is-hidden {
-    opacity: 0;
-    transform: translate(-50%, 10px);
-}
-
-.post-scroll-line {
-    display: block;
-    width: 1px;
-    height: 16px;
-    background: linear-gradient(var(--ink), transparent);
+        opacity 0.9s ease,
+        transform 1.2s var(--ease);
 }
 
 .post-content {
@@ -1745,10 +1759,6 @@ body.is-transitioning .cursor {
 
     .post-nav-link--next .post-nav-thumb {
         order: -1;
-    }
-
-    .post-scroll {
-        bottom: 18px;
     }
 }
 

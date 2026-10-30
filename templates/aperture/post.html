@@ -31,19 +31,19 @@
 
     <article class="post">
         {% if post.cover_image %}
-        {% set is_tall = post.photo.aspect and post.photo.aspect < 1 %}
-        <figure class="post-hero {% if is_tall %}is-tall{% else %}is-wide{% endif %}" style="--hero-color: {{ post.photo.color | default(value='#e7e4dd') }}">
-            <img src="{{ post.cover_image }}" alt="{{ post.title }}" fetchpriority="high" decoding="async">
+        <figure class="post-hero" style="--hero-color: {{ post.photo.color | default(value='#e7e4dd') }}">
+            <div class="post-frame">
+                <img src="{{ post.cover_image }}" alt="{{ post.title }}" fetchpriority="high" decoding="async">
+            </div>
+            <figcaption class="post-frame-caption">
+                <span>Frame {{ post_number }} / {{ post_total }}</span>
+                {% if post.photo.location %}<span class="caption-place">{{ post.photo.location }}</span>{% endif %}
+                <a class="caption-read" href="#post-content">Read the note <span aria-hidden="true">&darr;</span></a>
+            </figcaption>
         </figure>
-        {% if is_tall %}
-        <div class="post-scroll" id="post-scroll" aria-hidden="true">
-            <span>Scroll to read</span>
-            <span class="post-scroll-line"></span>
-        </div>
-        {% endif %}
         {% endif %}
 
-        <div class="post-content">
+        <div class="post-content" id="post-content">
             <p class="post-kicker">
                 <span>{{ post.date_display }}</span>
                 {% if post.photo.location %}<span class="dot" aria-hidden="true"></span><span>{{ post.photo.location }}</span>{% endif %}

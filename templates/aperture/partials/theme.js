@@ -202,6 +202,76 @@
     var galleryActive = false;
     var unloadDistance = 0;
     var currentScrollLeft = 0;
+    var RETURN_KEY = "aperture:gallery-return";
+    var pendingReturnY = null;
+
+    function saveGalleryReturn() {
+        try {
+            sessionStorage.setItem(
+                RETURN_KEY,
+                JSON.stringify({ y: Math.round(window.scrollY), at: Date.now() })
+            );
+        } catch (error) {
+            /* Storage can be unavailable in private modes; navigation still works. */
+        }
+    }
+
+    function readGalleryReturn() {
+        var raw;
+        try {
+            raw = sessionStorage.getItem(RETURN_KEY);
+        } catch (error) {
+            return null;
+        }
+        if (!raw) return null;
+
+        var data;
+        try {
+            data = JSON.parse(raw);
+        } catch (error) {
+            return null;
+        }
+        if (!data || typeof data.y !== "number") return null;
+        if (Date.now() - (data.at || 0) > 1000 * 60 * 60 * 6) return null;
+        return data.y;
+    }
+
+    function clearGalleryReturn() {
+        try {
+            sessionStorage.removeItem(RETURN_KEY);
+        } catch (error) {
+            /* Ignore. */
+        }
+    }
+
+    function cameFromPost() {
+        var nav =
+            window.performance && performance.getEntriesByType
+                ? performance.getEntriesByType("navigation")[0]
+                : null;
+        if (nav && nav.type === "back_forward") return true;
+
+        var referrer = doc.referrer || "";
+        if (!referrer) return false;
+        try {
+            var url = new URL(referrer);
+            return url.origin === window.location.origin && url.pathname.indexOf("/posts/") === 0;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function restoreGalleryReturn() {
+        if (pendingReturnY === null || !gallery) return;
+
+        var max = Math.max(0, doc.documentElement.scrollHeight - window.innerHeight);
+        var y = clamp(pendingReturnY, 0, max);
+
+        window.scrollTo(0, y);
+        updateGallery(true);
+
+        if (header) header.classList.toggle("is-scrolled", y > 8);
+    }
 
     function postUrl(post) {
         return "/posts/" + post.slug;
@@ -440,6 +510,8 @@
         if (!tile) return;
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
 
+        saveGalleryReturn();
+
         if (reduceMotion) return;
 
         var img = $("img", tile);
@@ -448,6 +520,23 @@
         if (!source) return;
 
         event.preventDefault();
+
+        // The clone lands on the framed position of the post page — the same
+        // rectangle the photograph occupies there — rather than full bleed.
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var headH = header ? header.offsetHeight : 0;
+        var pad = Math.min(26, Math.max(14, vw * 0.02));
+        var captionH = 42;
+        var imgW = (img && img.naturalWidth) || to.width;
+        var imgH = (img && img.naturalHeight) || to.height;
+        var boxW = vw - pad * 2;
+        var boxH = vh - headH - pad * 2 - captionH;
+        var fit = Math.min(boxW / imgW, boxH / imgH);
+        var endW = imgW * fit;
+        var endH = imgH * fit;
+        var endLeft = (vw - endW) / 2;
+        var endTop = headH + pad;
 
         var overlay = doc.createElement("div");
         overlay.className = "page-transition";
@@ -460,7 +549,7 @@
         clone.style.width = to.width + "px";
         clone.style.height = to.height + "px";
         clone.style.transition =
-            "left 0.72s cubic-bezier(0.16,1,0.3,1), top 0.72s cubic-bezier(0.16,1,0.3,1), width 0.72s cubic-bezier(0.16,1,0.3,1), height 0.72s cubic-bezier(0.16,1,0.3,1), filter 0.72s ease";
+            "left 0.62s cubic-bezier(0.16,1,0.3,1), top 0.62s cubic-bezier(0.16,1,0.3,1), width 0.62s cubic-bezier(0.16,1,0.3,1), height 0.62s cubic-bezier(0.16,1,0.3,1), filter 0.62s ease, opacity 0.4s ease";
 
         overlay.appendChild(clone);
         doc.body.appendChild(overlay);
@@ -470,10 +559,10 @@
 
         raf(function () {
             raf(function () {
-                clone.style.left = "0px";
-                clone.style.top = "0px";
-                clone.style.width = "100vw";
-                clone.style.height = "100vh";
+                clone.style.left = endLeft + "px";
+                clone.style.top = endTop + "px";
+                clone.style.width = endW + "px";
+                clone.style.height = endH + "px";
                 clone.style.filter = "saturate(1)";
             });
         });
@@ -485,7 +574,7 @@
             window.location.href = target;
         }
 
-        window.setTimeout(go, 620);
+        window.setTimeout(go, 600);
         // A refresh or a slow image should still land on the post.
         window.setTimeout(go, 1500);
     }
@@ -516,7 +605,6 @@
 
     var postPage = $(".post-page");
     var readingBar = $("#reading-progress-bar");
-    var postScroll = $("#post-scroll");
     var postHero = $(".post-hero");
     var postReady = false;
 
@@ -554,10 +642,6 @@
             var height = doc.documentElement.scrollHeight - window.innerHeight;
             var p = height > 0 ? clamp(window.scrollY / height, 0, 1) : 0;
             readingBar.style.transform = "scaleX(" + p + ")";
-        }
-
-        if (postScroll) {
-            postScroll.classList.toggle("is-hidden", window.scrollY > 48);
         }
     }
 
@@ -608,8 +692,47 @@
         initPost();
 
         if (gallery) {
+            // We restore the exact filmstrip position ourselves when a visitor
+            // comes back from a photograph, so the browser must not guess.
+            if ("scrollRestoration" in window.history) {
+                window.history.scrollRestoration = "manual";
+            }
+
             buildLayout();
             track.addEventListener("click", onGalleryClick);
+
+            if (cameFromPost()) {
+                var returnY = readGalleryReturn();
+                if (returnY !== null) {
+                    pendingReturnY = returnY;
+                    restoreGalleryReturn();
+
+                    if (doc.readyState === "complete") {
+                        clearGalleryReturn();
+                        pendingReturnY = null;
+                    } else {
+                        window.addEventListener(
+                            "load",
+                            function () {
+                                restoreGalleryReturn();
+                                clearGalleryReturn();
+                                pendingReturnY = null;
+                            },
+                            { once: true }
+                        );
+                    }
+                }
+            }
+
+            window.addEventListener("pageshow", function (event) {
+                if (!event.persisted) return;
+
+                var overlay = $(".page-transition");
+                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+
+                body.classList.remove("is-transitioning");
+                updateGallery(true);
+            });
 
             if (pin) {
                 pin.addEventListener("mouseenter", function () {

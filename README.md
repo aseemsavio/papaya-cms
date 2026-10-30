@@ -257,10 +257,14 @@ and they are requested again when you scroll back. A custom cursor, clip-path
 reveals, and a thumbnail-to-full-frame page transition stay out of the way of
 the photographs.
 
-The post page is a full-bleed image (tall frames scroll at their natural
-height), followed by a quiet title, the story, and a capture-details grid:
-camera, lens, focal length, aperture, shutter, ISO, white balance, medium,
-location, and date. Every field is optional and rendered from Markdown.
+The post page shows the photograph whole, on a small paper margin, scaled as
+large as the screen allows and never cropped — portrait frames included. A
+caption row carries the frame number and location, then a quiet title, the
+story, and a capture-details grid: camera, lens, focal length, aperture,
+shutter, ISO, white balance, medium, location, and date. Every field is
+optional and rendered from Markdown. Returning to the index — with the back
+button or the Index link — restores the exact place on the filmstrip where the
+photograph was opened.
 
 ### Photography frontmatter
 
