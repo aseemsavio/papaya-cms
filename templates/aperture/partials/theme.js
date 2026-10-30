@@ -522,20 +522,16 @@
         event.preventDefault();
 
         // The clone lands on the framed position of the post page — the same
-        // rectangle the photograph occupies there — rather than full bleed.
+        // rectangle the photograph occupies there: edge to edge inside the
+        // page margin, at its natural aspect ratio.
         var vw = window.innerWidth;
-        var vh = window.innerHeight;
         var headH = header ? header.offsetHeight : 0;
         var pad = Math.min(26, Math.max(14, vw * 0.02));
-        var captionH = 42;
         var imgW = (img && img.naturalWidth) || to.width;
         var imgH = (img && img.naturalHeight) || to.height;
-        var boxW = vw - pad * 2;
-        var boxH = vh - headH - pad * 2 - captionH;
-        var fit = Math.min(boxW / imgW, boxH / imgH);
-        var endW = imgW * fit;
-        var endH = imgH * fit;
-        var endLeft = (vw - endW) / 2;
+        var endW = Math.max(1, vw - pad * 2);
+        var endH = endW * (imgH / imgW);
+        var endLeft = pad;
         var endTop = headH + pad;
 
         var overlay = doc.createElement("div");

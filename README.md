@@ -257,8 +257,9 @@ and they are requested again when you scroll back. A custom cursor, clip-path
 reveals, and a thumbnail-to-full-frame page transition stay out of the way of
 the photographs.
 
-The post page shows the photograph whole, on a small paper margin, scaled as
-large as the screen allows and never cropped — portrait frames included. A
+The post page shows the photograph edge to edge inside a small paper margin, at
+its own aspect ratio and never cropped — portrait frames continue below the
+fold and are read by scrolling. A
 caption row carries the frame number and location, then a quiet title, the
 story, and a capture-details grid: camera, lens, focal length, aperture,
 shutter, ISO, white balance, medium, location, and date. Every field is

@@ -1068,37 +1068,31 @@ body.is-indexing .gallery-ui {
     transform-origin: 0 50%;
 }
 
-/* The photograph is shown at the largest size that still fits the screen,
-   with a quiet margin around it. Never cropped — every edge stays visible. */
+/* The photograph runs edge to edge inside a quiet margin, at its own aspect
+   ratio. Nothing is cropped: landscape frames end where they end, and tall
+   frames simply continue below the fold for the viewer to scroll through. */
 .post-hero {
     position: relative;
     display: flex;
     flex-direction: column;
     width: 100%;
     margin: 0;
-    padding: var(--frame-pad);
+    padding: var(--frame-pad) var(--frame-pad) 0;
     background: var(--paper);
 }
 
 .post-frame {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     width: 100%;
-    min-height: 0;
 }
 
 .post-frame img {
     display: block;
-    width: auto;
+    width: 100%;
     height: auto;
     max-width: 100%;
-    max-height: calc(
-        100svh - var(--head-h) - var(--frame-pad) - var(--frame-pad) - 42px
-    );
     background: var(--hero-color, var(--paper-deep));
     box-shadow: inset 0 0 0 1px var(--line);
-    object-fit: contain;
     filter: saturate(0.94) contrast(1.01);
 }
 
