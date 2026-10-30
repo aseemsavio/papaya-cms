@@ -12,6 +12,7 @@ use crate::error::{AppError, AppResult};
 pub struct S3Client {
     client: S3SdkClient,
     bucket: String,
+    root_folder: String,
 }
 
 impl S3Client {
@@ -49,19 +50,28 @@ impl S3Client {
         Ok(Self {
             client,
             bucket: config.s3.bucket.clone(),
+            root_folder: config.s3.root_folder.trim_matches('/').to_string(),
         })
+    }
+
+    /// Maps a site-relative key (e.g. `markdown/post.md`) to its bucket key
+    /// (e.g. `blog-a/markdown/post.md`).
+    fn full_key(&self, key: &str) -> String {
+        format!("{}/{}", self.root_folder, key)
     }
 
     pub async fn list_objects(&self, prefix: &str) -> AppResult<Vec<String>> {
         let mut keys = Vec::new();
         let mut continuation_token: Option<String> = None;
+        let full_prefix = self.full_key(prefix);
+        let root_prefix = format!("{}/", self.root_folder);
 
         loop {
             let mut request = self
                 .client
                 .list_objects_v2()
                 .bucket(&self.bucket)
-                .prefix(prefix);
+                .prefix(&full_prefix);
 
             if let Some(token) = continuation_token {
                 request = request.continuation_token(token);
@@ -72,7 +82,8 @@ impl S3Client {
             if let Some(contents) = response.contents {
                 for object in contents {
                     if let Some(key) = object.key {
-                        keys.push(key);
+                        let relative = key.strip_prefix(&root_prefix).unwrap_or(&key);
+                        keys.push(relative.to_string());
                     }
                 }
             }
@@ -92,7 +103,7 @@ impl S3Client {
             .client
             .get_object()
             .bucket(&self.bucket)
-            .key(key)
+            .key(self.full_key(key))
             .send()
             .await
             .map_err(|e| AppError::S3(e.to_string()))?;
@@ -109,7 +120,7 @@ impl S3Client {
             .client
             .get_object()
             .bucket(&self.bucket)
-            .key(key)
+            .key(self.full_key(key))
             .send()
             .await
             .map_err(|e| AppError::S3(e.to_string()))?;
@@ -123,7 +134,7 @@ impl S3Client {
         self.client
             .put_object()
             .bucket(&self.bucket)
-            .key(key)
+            .key(self.full_key(key))
             .body(body)
             .content_type(content_type)
             .send()
@@ -137,7 +148,7 @@ impl S3Client {
         self.client
             .delete_object()
             .bucket(&self.bucket)
-            .key(key)
+            .key(self.full_key(key))
             .send()
             .await
             .map_err(|e| AppError::S3(e.to_string()))?;

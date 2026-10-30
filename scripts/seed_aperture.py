@@ -26,6 +26,7 @@ MARKDOWN = ROOT / ".local-content" / "markdown"
 
 ENDPOINT = os.environ.get("S3_ENDPOINT", "http://127.0.0.1:9000")
 BUCKET = os.environ.get("S3_BUCKET", "papaya")
+ROOT_FOLDER = os.environ.get("S3_ROOT_FOLDER", "still").strip("/")
 ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "test")
 SECRET_KEY = os.environ.get("S3_SECRET_KEY", "testtest")
 PUBLIC_BASE = os.environ.get("S3_PUBLIC_BASE", f"{ENDPOINT}/{BUCKET}")
@@ -717,8 +718,8 @@ def yaml_string(value: str) -> str:
 def render_markdown(post: dict, width: int, height: int, color: str) -> str:
     kit = KITS[post["kit"]]
     aspect = round(width / height, 4)
-    image_url = f"{PUBLIC_BASE}/assets/images/{post['slug']}.jpg"
-    thumb_url = f"{PUBLIC_BASE}/assets/images/{post['slug']}-thumb.jpg"
+    image_url = f"{PUBLIC_BASE}/{ROOT_FOLDER}/assets/images/{post['slug']}.jpg"
+    thumb_url = f"{PUBLIC_BASE}/{ROOT_FOLDER}/assets/images/{post['slug']}-thumb.jpg"
 
     lines = [
         "---",
@@ -778,13 +779,14 @@ def main() -> int:
     except Exception:
         s3.create_bucket(Bucket=BUCKET)
 
-    # Fresh demo: drop anything left from an older seed.
-    existing = s3.list_objects_v2(Bucket=BUCKET).get("Contents", [])
-    if existing:
-        s3.delete_objects(
-            Bucket=BUCKET,
-            Delete={"Objects": [{"Key": obj["Key"]} for obj in existing]},
-        )
+    # Fresh demo: drop anything left from an older seed, including content
+    # uploaded before the site had a root folder.
+    stale = []
+    for prefix in (f"{ROOT_FOLDER}/", "markdown/", "assets/"):
+        listing = s3.list_objects_v2(Bucket=BUCKET, Prefix=prefix).get("Contents", [])
+        stale += [{"Key": obj["Key"]} for obj in listing]
+    if stale:
+        s3.delete_objects(Bucket=BUCKET, Delete={"Objects": stale})
 
     MARKDOWN.mkdir(parents=True, exist_ok=True)
     (UPLOAD / "assets" / "images").mkdir(parents=True, exist_ok=True)
@@ -802,21 +804,21 @@ def main() -> int:
 
         s3.put_object(
             Bucket=BUCKET,
-            Key=f"assets/images/{slug}.jpg",
+            Key=f"{ROOT_FOLDER}/assets/images/{slug}.jpg",
             Body=source.read_bytes(),
             ContentType="image/jpeg",
             CacheControl="public, max-age=31536000, immutable",
         )
         s3.put_object(
             Bucket=BUCKET,
-            Key=f"assets/images/{slug}-thumb.jpg",
+            Key=f"{ROOT_FOLDER}/assets/images/{slug}-thumb.jpg",
             Body=thumb_path.read_bytes(),
             ContentType="image/jpeg",
             CacheControl="public, max-age=31536000, immutable",
         )
         s3.put_object(
             Bucket=BUCKET,
-            Key=f"markdown/{slug}.md",
+            Key=f"{ROOT_FOLDER}/markdown/{slug}.md",
             Body=markdown.encode("utf-8"),
             ContentType="text/markdown; charset=utf-8",
             CacheControl="public, max-age=60",
@@ -831,13 +833,13 @@ def main() -> int:
                 "Effect": "Allow",
                 "Principal": "*",
                 "Action": ["s3:GetObject"],
-                "Resource": [f"arn:aws:s3:::{BUCKET}/assets/*"],
+                "Resource": [f"arn:aws:s3:::{BUCKET}/{ROOT_FOLDER}/assets/*"],
             }
         ],
     }
     s3.put_bucket_policy(Bucket=BUCKET, Policy=json.dumps(policy))
 
-    print(f"\nSeeded {len(POSTS)} posts into {ENDPOINT}/{BUCKET}")
+    print(f"\nSeeded {len(POSTS)} posts into {ENDPOINT}/{BUCKET}/{ROOT_FOLDER}")
     print(f"Markdown: {MARKDOWN}")
     return 0
 

@@ -39,13 +39,18 @@ A modern, high-performance blog platform built with Rust, Axum, Tera templates, 
 
 ```
 your-bucket/
-├── markdown/
-│   ├── my-first-post.md
-│   └── another-post.md
-└── assets/
-    ├── images/
-    └── videos/
+└── <root_folder>/
+    ├── markdown/
+    │   ├── my-first-post.md
+    │   └── another-post.md
+    └── assets/
+        ├── images/
+        └── videos/
 ```
+
+Everything for one site lives inside its `root_folder` (`s3.root_folder` in the
+config, required). Several blogs can share one bucket by giving each its own
+folder.
 
 ## Markdown Format
 
@@ -324,8 +329,9 @@ cargo run -- --template-dir ./templates --template-name aperture
 
 Open <http://127.0.0.1:8080>.
 
-The seed script uses `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, and
-`S3_SECRET_KEY` (defaults match `config.toml`) and publishes `assets/*` for
+The seed script uses `S3_ENDPOINT`, `S3_BUCKET`, `S3_ROOT_FOLDER`,
+`S3_ACCESS_KEY`, and `S3_SECRET_KEY` (defaults match `config.toml`) and writes
+everything under `S3_ROOT_FOLDER`. It publishes that folder's `assets/*` for
 anonymous reads so the browser can load photographs directly from S3.
 `.local-content/` and `.minio-data/` are git-ignored; no photographs or
 generated Markdown are committed.
